@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>터진튜브 — 유튜브 급등 영상 탐색기</title>
+<title>셀럽템 파인더 — 연예인 쇼핑쇼츠 발굴기</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -71,7 +71,7 @@ body{font-family:'Pretendard','Apple SD Gothic Neo',sans-serif;background:var(--
 .search-box:focus-within{border-color:var(--accent);box-shadow:0 0 0 3px rgba(108,99,255,0.1)}
 .search-box input{flex:1;border:none;outline:none;font-size:14px;color:var(--text);background:transparent}
 .search-box input::placeholder{color:var(--muted)}
-.filter-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:16px}
+.filter-row{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-top:16px}
 .filter-select-wrap{display:flex;flex-direction:column;gap:6px}
 .filter-label{font-size:11px;color:var(--muted);font-weight:600}
 .filter-select{border:1px solid var(--border);border-radius:8px;padding:9px 12px;font-size:13px;color:var(--text);background:var(--surface);cursor:pointer;outline:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238888A0' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:28px}
@@ -123,6 +123,37 @@ body{font-family:'Pretendard','Apple SD Gothic Neo',sans-serif;background:var(--
 @keyframes spin{to{transform:rotate(360deg)}}
 .toast{position:fixed;bottom:24px;right:24px;background:#1A1A2E;color:#fff;padding:12px 18px;border-radius:10px;font-size:13px;font-weight:500;z-index:9999;transform:translateY(80px);opacity:0;transition:all .3s}
 .toast.show{transform:translateY(0);opacity:1}
+
+/* GOLDEN CARD */
+.golden-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;margin-top:8px}
+.golden-card{background:#1A1A2E;border-radius:var(--radius);overflow:hidden;cursor:pointer;transition:all .2s;position:relative;color:#fff}
+.golden-card:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(108,99,255,0.25)}
+.gc-thumb{width:100%;aspect-ratio:16/9;position:relative;overflow:hidden;background:#0D0D1A;display:flex;align-items:center;justify-content:center}
+.gc-thumb img{width:100%;height:100%;object-fit:cover;display:block;position:absolute;top:0;left:0;opacity:0.85}
+.gc-thumb-ph{font-size:32px;z-index:0}
+.gc-rank{position:absolute;top:8px;left:8px;background:rgba(0,0,0,0.75);color:#fff;font-size:11px;font-weight:800;padding:3px 7px;border-radius:6px;z-index:2}
+.gc-shorts{position:absolute;top:8px;right:8px;background:var(--accent2);color:#fff;font-size:10px;font-weight:700;padding:2px 7px;border-radius:5px;z-index:2}
+.gc-star{position:absolute;bottom:8px;right:8px;width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,0.15);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;z-index:2;transition:all .15s}
+.gc-star:hover{background:rgba(255,255,255,0.3)}
+.gc-body{padding:12px}
+.gc-title{font-size:13px;font-weight:600;line-height:1.4;margin-bottom:10px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;color:#F0F0FF}
+.gc-ch{display:flex;align-items:center;gap:6px;margin-bottom:10px}
+.gc-ch-dot{width:20px;height:20px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#fff;flex-shrink:0}
+.gc-ch-name{font-size:11px;color:#A0A0C0;font-weight:500}
+.gc-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:10px}
+.gc-stat{background:rgba(255,255,255,0.06);border-radius:8px;padding:7px 8px;text-align:center}
+.gc-stat-label{font-size:9px;color:#6060A0;font-weight:600;margin-bottom:3px;letter-spacing:0.03em}
+.gc-stat-val{font-size:13px;font-weight:800;color:#E0E0FF}
+.gc-bottom{display:flex;align-items:center;justify-content:space-between;padding-top:8px;border-top:1px solid rgba(255,255,255,0.08)}
+.gc-vel{font-size:12px;font-weight:700;color:#F59E0B;display:flex;align-items:center;gap:3px}
+.gc-vel-bar{height:3px;background:rgba(255,255,255,0.1);border-radius:2px;margin-top:4px;overflow:hidden}
+.gc-vel-fill{height:100%;background:linear-gradient(90deg,#F59E0B,#FF6B9D);border-radius:2px;transition:width .4s}
+.gc-copy{background:none;border:none;cursor:pointer;color:#6060A0;font-size:14px;padding:2px}
+.gc-copy:hover{color:#A0A0FF}
+.golden-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px}
+.golden-count{font-size:13px;color:var(--muted);font-weight:500}
+.golden-update{font-size:11px;color:var(--muted);display:flex;align-items:center;gap:4px}
+
 ::-webkit-scrollbar{width:5px}::-webkit-scrollbar-thumb{background:var(--border);border-radius:10px}
 </style>
 </head>
@@ -130,50 +161,55 @@ body{font-family:'Pretendard','Apple SD Gothic Neo',sans-serif;background:var(--
 
 <aside class="sidebar">
   <div class="sidebar-logo">
-    <div class="logo-badge">🔥 LIVE</div>
-    <div class="logo-title">터진튜브</div>
-    <div class="logo-sub">유튜브 급등 영상 탐색기</div>
+    <div class="logo-badge">🛍 CELEB</div>
+    <div class="logo-title">셀럽템 파인더</div>
+    <div class="logo-sub">연예인 쇼핑쇼츠 발굴기</div>
   </div>
   <div style="padding:8px 0 4px">
     <div class="nav-item" data-page="golden" onclick="navigate('golden')"><span class="nav-icon">📊</span> 황금 채널 발굴기</div>
-    <div class="nav-item" data-page="search" onclick="navigate('search')"><span class="nav-icon">🔍</span> 조회수 폭발 쇼츠</div>
-    <div class="nav-item active" data-page="trending" onclick="navigate('trending')"><span class="nav-icon">🔥</span> 터진 영상</div>
+    <div class="nav-item" data-page="search" onclick="navigate('search')"><span class="nav-icon">🔍</span> 셀럽템 검색</div>
+    <div class="nav-item active" data-page="trending" onclick="navigate('trending')"><span class="nav-icon">🛍</span> 연예인 쇼핑쇼츠</div>
     <div class="nav-item" data-page="ranking" onclick="navigate('ranking')"><span class="nav-icon">📈</span> 채널 랭킹</div>
     <div class="nav-item" data-page="favorites" onclick="navigate('favorites')"><span class="nav-icon">⭐</span> 즐겨찾기</div>
     <div style="height:1px;background:var(--border);margin:8px 16px"></div>
     <div class="nav-item" data-page="apikey" onclick="navigate('apikey')"><span class="nav-icon">🔑</span> YouTube API 키 설정</div>
     <div class="nav-item" data-page="subs" onclick="navigate('subs')"><span class="nav-icon">👥</span> 구독 관리</div>
   </div>
-  <div class="sidebar-footer">v2.0.0 · 터진튜브</div>
+  <div class="sidebar-footer">v3.0.0 · 셀럽템 파인더</div>
 </aside>
 
 <div class="main">
   <div class="topbar">
     <div>
-      <div class="topbar-title" id="topbar-title">🔥 터진 영상</div>
-      <div class="topbar-sub" id="topbar-sub">조회수가 빠르게 올라가고 있는 영상들</div>
+      <div class="topbar-title" id="topbar-title">🛍 연예인 쇼핑쇼츠 급등</div>
+      <div class="topbar-sub" id="topbar-sub">최근 업로드 + 조회수 폭발 중인 연예인 템 쇼츠</div>
     </div>
     <button class="refresh-btn" onclick="loadCurrentPage()">↻ 새로고침</button>
   </div>
   <div id="api-banner" class="api-banner">
     <span>⚠️</span>
-    <span><strong>YouTube API 키가 없습니다.</strong> 실제 데이터를 보려면 API 키를 등록해 주세요.</span>
+    <span><strong>YouTube API 키가 없습니다.</strong> 연예인 쇼핑쇼츠 실제 데이터를 보려면 API 키를 등록해 주세요.</span>
     <button class="api-banner-btn" onclick="navigate('apikey')">⚙ 키 등록하기</button>
   </div>
   <div class="content">
 
-    <!-- 터진 영상 -->
+    <!-- 연예인 쇼핑쇼츠 -->
     <div class="page active" id="page-trending">
       <div class="filter-bar">
         <div class="filter-group">
-          <button class="ftab active2" data-group="type" data-val="short" onclick="setFilter('type',this)">쇼츠</button>
-          <button class="ftab" data-group="type" data-val="long" onclick="setFilter('type',this)">롱폼</button>
-          <button class="ftab" data-group="type" data-val="all" onclick="setFilter('type',this)">전체</button>
+          <button class="ftab active2" data-group="celebcat" data-val="연예인 추천템 #shorts" onclick="setFilter('celebcat',this);loadTrending()">⭐ 추천템</button>
+          <button class="ftab" data-group="celebcat" data-val="연예인 명품템 #shorts" onclick="setFilter('celebcat',this);loadTrending()">💎 명품템</button>
+          <button class="ftab" data-group="celebcat" data-val="연예인 쇼핑 하울 #shorts" onclick="setFilter('celebcat',this);loadTrending()">🛍 하울</button>
+          <button class="ftab" data-group="celebcat" data-val="아이돌 착용템 #shorts" onclick="setFilter('celebcat',this);loadTrending()">🎤 아이돌템</button>
+          <button class="ftab" data-group="celebcat" data-val="연예인 패션 #shorts" onclick="setFilter('celebcat',this);loadTrending()">👗 패션</button>
+          <button class="ftab" data-group="celebcat" data-val="연예인 뷰티 #shorts" onclick="setFilter('celebcat',this);loadTrending()">💄 뷰티</button>
+          <button class="ftab" data-group="celebcat" data-val="셀럽 가방 신발 #shorts" onclick="setFilter('celebcat',this);loadTrending()">👜 가방·신발</button>
         </div>
         <div class="filter-divider"></div>
         <div class="filter-group">
-          <button class="ftab active" data-group="tsort" data-val="viewCount" onclick="setFilter('tsort',this)">🔥 급등순</button>
-          <button class="ftab" data-group="tsort" data-val="date" onclick="setFilter('tsort',this)">🕐 최신순</button>
+          <button class="ftab active" data-group="tsort" data-val="hot" onclick="setFilter('tsort',this);loadTrending()">🔥 최근+조회수</button>
+          <button class="ftab" data-group="tsort" data-val="viewCount" onclick="setFilter('tsort',this);loadTrending()">👁 조회수순</button>
+          <button class="ftab" data-group="tsort" data-val="date" onclick="setFilter('tsort',this);loadTrending()">🕐 최신순</button>
         </div>
         <div class="filter-divider"></div>
         <div class="filter-group">
@@ -193,13 +229,16 @@ body{font-family:'Pretendard','Apple SD Gothic Neo',sans-serif;background:var(--
         <div class="result-count" id="result-count">-</div>
       </div>
       <div class="cat-bar">
-        <button class="ftab active" data-group="cat" data-val="10" onclick="setFilter('cat',this);loadTrending()">🎵 음악</button>
-        <button class="ftab" data-group="cat" data-val="24" onclick="setFilter('cat',this);loadTrending()">🌟 연예·이슈</button>
-        <button class="ftab" data-group="cat" data-val="26" onclick="setFilter('cat',this);loadTrending()">🛍 하울·리뷰</button>
-        <button class="ftab" data-group="cat" data-val="1" onclick="setFilter('cat',this);loadTrending()">🎬 드라마·영화</button>
-        <button class="ftab" data-group="cat" data-val="22" onclick="setFilter('cat',this);loadTrending()">👨‍👩‍👧 라이프</button>
-        <button class="ftab" data-group="cat" data-val="25" onclick="setFilter('cat',this);loadTrending()">🍜 먹방·요리</button>
-        <button class="ftab" data-group="cat" data-val="28" onclick="setFilter('cat',this);loadTrending()">🔬 과학·기술</button>
+        <span style="font-size:11px;color:var(--muted);font-weight:700;align-self:center;margin-right:4px">업로드</span>
+        <button class="ftab active" data-group="tperiod" data-val="3" onclick="setFilter('tperiod',this);loadTrending()">3일 이내</button>
+        <button class="ftab" data-group="tperiod" data-val="7" onclick="setFilter('tperiod',this);loadTrending()">1주일</button>
+        <button class="ftab" data-group="tperiod" data-val="30" onclick="setFilter('tperiod',this);loadTrending()">1개월</button>
+        <div style="width:1px;height:20px;background:var(--border);margin:0 4px;align-self:center"></div>
+        <span style="font-size:11px;color:var(--muted);font-weight:700;align-self:center;margin-right:4px">최소 조회수</span>
+        <button class="ftab active" data-group="tminviews" data-val="0" onclick="setFilter('tminviews',this);loadTrending()">제한없음</button>
+        <button class="ftab" data-group="tminviews" data-val="10000" onclick="setFilter('tminviews',this);loadTrending()">1만+</button>
+        <button class="ftab" data-group="tminviews" data-val="100000" onclick="setFilter('tminviews',this);loadTrending()">10만+</button>
+        <button class="ftab" data-group="tminviews" data-val="500000" onclick="setFilter('tminviews',this);loadTrending()">50만+</button>
       </div>
       <div id="trending-grid"><div class="loading"><div class="spinner"></div> 불러오는 중...</div></div>
     </div>
@@ -208,33 +247,45 @@ body{font-family:'Pretendard','Apple SD Gothic Neo',sans-serif;background:var(--
     <div class="page" id="page-search">
       <div class="search-box">
         <span style="font-size:18px;color:var(--muted)">🔍</span>
-        <input type="text" id="search-input" placeholder="검색어를 입력하세요 (예: 요리, 운동, 재테크...)" onkeydown="if(event.key==='Enter')doSearch()">
+        <input type="text" id="search-input" placeholder="검색어 입력 (예: 연예인 명품템, 아이돌 추천 가방, 셀럽 뷰티...)" onkeydown="if(event.key==='Enter')doSearch()">
       </div>
       <div class="filter-row">
         <div class="filter-select-wrap">
           <div class="filter-label">📅 업로드 일자</div>
           <select class="filter-select" id="f-date">
             <option value="today">오늘</option>
-            <option value="week" selected>최근 1주일</option>
-            <option value="month">최근 1개월</option>
+            <option value="week">최근 1주일</option>
+            <option value="month" selected>최근 1개월</option>
+            <option value="3month">최근 3개월</option>
           </select>
         </div>
         <div class="filter-select-wrap">
           <div class="filter-label">👀 최소 조회수</div>
           <select class="filter-select" id="f-views">
             <option value="0">제한 없음</option>
-            <option value="10000">1만회 이상</option>
+            <option value="30000">3만회 이상</option>
             <option value="100000">10만회 이상</option>
+            <option value="300000">30만회 이상</option>
             <option value="1000000">100만회 이상</option>
+          </select>
+        </div>
+        <div class="filter-select-wrap">
+          <div class="filter-label">👥 최대 구독자</div>
+          <select class="filter-select" id="f-maxsubs">
+            <option value="0">제한 없음</option>
+            <option value="10000">1만 명 이하</option>
+            <option value="50000">5만 명 이하</option>
+            <option value="100000">10만 명 이하</option>
+            <option value="1000000">100만 명 이하</option>
           </select>
         </div>
         <div class="filter-select-wrap">
           <div class="filter-label">📐 영상 길이</div>
           <select class="filter-select" id="f-dur">
+            <option value="any" selected>전체</option>
             <option value="short">쇼츠 (60초 이하)</option>
             <option value="medium">중간 (4~20분)</option>
             <option value="long">롱폼 (20분+)</option>
-            <option value="any">전체</option>
           </select>
         </div>
         <div class="filter-select-wrap">
@@ -246,7 +297,7 @@ body{font-family:'Pretendard','Apple SD Gothic Neo',sans-serif;background:var(--
           </select>
         </div>
       </div>
-      <button class="search-cta" onclick="doSearch()">🚀 떡상 영상 발굴 시작</button>
+      <button class="search-cta" onclick="doSearch()">🚀 셀럽템 쇼츠 발굴 시작</button>
       <div id="search-results" style="margin-top:20px"></div>
     </div>
 
@@ -307,7 +358,8 @@ body{font-family:'Pretendard','Apple SD Gothic Neo',sans-serif;background:var(--
           </div>
         </div>
       </div>
-      <div id="golden-results" style="margin-top:24px">
+      <div class="golden-header" style="margin-top:24px"><div class="golden-count" id="golden-count"></div><div class="golden-update" id="golden-update"></div></div>
+      <div id="golden-results">
         <div class="empty-state">
           <div class="empty-icon">👆</div>
           <div class="empty-title">관심 주제를 선택해 주세요</div>
@@ -362,7 +414,7 @@ const S = {
   page: 'trending',
   apiKey: localStorage.getItem('yt_api_key') || '',
   favorites: JSON.parse(localStorage.getItem('yt_favorites') || '[]'),
-  filters: { type:'short', tsort:'viewCount', cat:'10', tregion:'KR', rcat:'10', rregion:'KR', vtype:'short', gsubs:'', gsort:'viewCount' },
+  filters: { type:'short', tsort:'hot', cat:'10', tregion:'KR', celebcat:'연예인 추천템 #shorts', tperiod:'3', tminviews:'0', rcat:'10', rregion:'KR', vtype:'short', gsubs:'', gsort:'viewCount' },
   gTopic: null, gCatId: null,
 };
 
@@ -382,8 +434,8 @@ const TOPICS = [
 ];
 
 const PAGE_META = {
-  trending:{title:'🔥 터진 영상',sub:'조회수가 빠르게 올라가고 있는 영상들'},
-  search:{title:'🔍 조회수 폭발 쇼츠 찾기',sub:'키워드로 급성장 영상을 발굴하세요'},
+  trending:{title:'🛍 연예인 쇼핑쇼츠 급등',sub:'최근 업로드 + 조회수 폭발 중인 연예인 템 쇼츠'},
+  search:{title:'🔍 셀럽템 쇼츠 검색',sub:'연예인 추천템·명품템 관련 쇼츠를 발굴하세요'},
   ranking:{title:'📈 채널 랭킹',sub:'카테고리별 인기 영상 순위'},
   golden:{title:'📊 황금 채널 발굴기',sub:'관심 주제별 숨은 급등 채널 발굴'},
   favorites:{title:'⭐ 즐겨찾기',sub:'저장한 영상 모아보기'},
@@ -441,6 +493,66 @@ function isShort(dur, snippet) {
 
 function randStatus() { return ['new','up','up','keep','keep','down'][Math.floor(Math.random()*6)]; }
 
+
+// 황금채널 전용 카드 (구독자수 + 조회수 + 업로드시간 + 일일조회수)
+function goldenCard(v, rank, chStats) {
+  const vid = typeof v.id === 'object' ? (v.id.videoId||'') : (v.id||'');
+  const title = (v.snippet?.title||'').replace(/'/g,"&#39;");
+  const channel = v.snippet?.channelTitle||'';
+  const thumb = v.snippet?.thumbnails?.medium?.url || v.snippet?.thumbnails?.default?.url || '';
+  const views = parseInt(v.statistics?.viewCount||0);
+  const pub = v.snippet?.publishedAt || '';
+  const dur = v.contentDetails?.duration || '';
+  const short = isShort(dur, v.snippet);
+  const isFav = S.favorites.includes(vid);
+
+  // 구독자수 (채널 API에서)
+  const subs = chStats ? parseInt(chStats.subscriberCount||0) : 0;
+  // 일일 조회수 = 총조회수 / 업로드 후 일수
+  const daysSince = Math.max(1, (Date.now() - new Date(pub)) / 86400000);
+  const dailyViews = Math.round(views / daysSince);
+  // velocity 퍼센트 (최대 10만/일 기준)
+  const velPct = Math.min(100, Math.round(dailyViews / 1000));
+
+  return `<div class="golden-card" onclick="openVideo('${vid}')">
+    <div class="gc-thumb">
+      <div class="gc-thumb-ph">🎬</div>
+      ${thumb ? `<img src="${thumb}" alt="" loading="lazy">` : ''}
+      ${rank ? `<div class="gc-rank">#${rank}</div>` : ''}
+      ${short ? '<div class="gc-shorts">Shorts</div>' : ''}
+      <button class="gc-star" onclick="event.stopPropagation();toggleFav('${vid}',this)">${isFav?'⭐':'☆'}</button>
+    </div>
+    <div class="gc-body">
+      <div class="gc-title">${title}</div>
+      <div class="gc-ch">
+        <div class="gc-ch-dot">${channel[0]||'?'}</div>
+        <div class="gc-ch-name">${channel}</div>
+      </div>
+      <div class="gc-stats">
+        <div class="gc-stat">
+          <div class="gc-stat-label">구독자</div>
+          <div class="gc-stat-val">${subs ? fmtNum(subs)+'명' : '—'}</div>
+        </div>
+        <div class="gc-stat">
+          <div class="gc-stat-label">조회수</div>
+          <div class="gc-stat-val">${fmtNum(views)}회</div>
+        </div>
+        <div class="gc-stat">
+          <div class="gc-stat-label">업로드</div>
+          <div class="gc-stat-val">${timeAgo(pub)}</div>
+        </div>
+      </div>
+      <div class="gc-bottom">
+        <div>
+          <div class="gc-vel">📈 ${fmtNum(dailyViews)}회/일</div>
+          <div class="gc-vel-bar"><div class="gc-vel-fill" style="width:${velPct}%"></div></div>
+        </div>
+        <button class="gc-copy" onclick="event.stopPropagation();copyTitle('${title}')">📋</button>
+      </div>
+    </div>
+  </div>`;
+}
+
 function videoCard(v, rank, dur) {
   const short = isShort(dur, v.snippet);
   const isFav = S.favorites.includes(v.id);
@@ -484,101 +596,127 @@ async function loadTrending() {
   const grid = document.getElementById('trending-grid');
   if (!S.apiKey) { grid.innerHTML = noApiHtml(); return; }
   grid.innerHTML = loadingHtml();
-  const region = S.filters.tregion || 'KR';
-  const catId = S.filters.cat;
-  const wantShorts = S.filters.type === 'short';
-  const wantLong   = S.filters.type === 'long';
-  let items = [];
 
-  if (wantShorts) {
-    // mostPopular + #shorts 검색 병렬 실행
-    const [popData, srData] = await Promise.all([
-      ytFetch('/videos', {
-        part:'snippet,statistics,contentDetails', chart:'mostPopular',
-        regionCode:region, videoCategoryId:catId, maxResults:50, hl:'ko',
-      }),
-      ytFetch('/search', {
-        part:'snippet', q:'#shorts', type:'video', videoDuration:'short',
-        order:'viewCount', regionCode:region, relevanceLanguage:'ko',
-        videoCategoryId:catId, maxResults:50,
-      }),
-    ]);
-    const seenIds = new Set();
-    // mostPopular에서 쇼츠만 추출
-    (popData?.items || []).forEach(v => {
-      if (isShort(v.contentDetails?.duration, v.snippet)) {
-        seenIds.add(v.id); items.push(v);
-      }
+  const region   = S.filters.tregion || 'KR';
+  const celebQ   = S.filters.celebcat || '연예인 추천템 #shorts';
+  const sortMode = S.filters.tsort || 'hot';
+  const days     = parseInt(S.filters.tperiod || '3');
+  const minViews = parseInt(S.filters.tminviews || '0');
+  const publishedAfter = new Date(Date.now() - days * 86400000).toISOString();
+
+  // 쿼리 2개 병렬 — videoDuration 제거, publishedAfter만 기간 필터로 사용
+  const altQ = celebQ.replace('#shorts', '').trim() + ' 쇼츠';
+  const baseQ = celebQ.replace('#shorts', '').trim();
+
+  const [sr1, sr2, sr3] = await Promise.all([
+    ytFetch('/search', {
+      part:'snippet', q:celebQ, type:'video',
+      order:'viewCount', regionCode:region, relevanceLanguage:'ko',
+      publishedAfter, maxResults:50,
+    }),
+    ytFetch('/search', {
+      part:'snippet', q:altQ, type:'video',
+      order:'viewCount', regionCode:region, relevanceLanguage:'ko',
+      publishedAfter, maxResults:50,
+    }),
+    ytFetch('/search', {
+      part:'snippet', q:baseQ, type:'video',
+      order:'viewCount', regionCode:region, relevanceLanguage:'ko',
+      maxResults:50,  // publishedAfter 없이 — 기간 관계없이 인기 영상도 포함
+    }),
+  ]);
+
+  const seenIds = new Set();
+  const allIds = [];
+  [sr1, sr2, sr3].forEach(data => {
+    (data?.items || []).forEach(item => {
+      const vid = item.id?.videoId;
+      if (vid && !seenIds.has(vid)) { seenIds.add(vid); allIds.push(vid); }
     });
-    // #shorts 검색 결과 중 새 ID만
-    const newIds = (srData?.items || [])
-      .map(i => i.id?.videoId).filter(id => id && !seenIds.has(id));
-    if (newIds.length) {
-      const extra = await ytFetch('/videos', {
-        part:'snippet,statistics,contentDetails', id:newIds.join(','),
-      });
-      (extra?.items || []).forEach(v => { seenIds.add(v.id); items.push(v); });
-    }
+  });
+
+  if (!allIds.length) { grid.innerHTML = emptyHtml('해당 조건의 영상이 없습니다'); return; }
+
+  // 통계 한 번에 (최대 50개씩 나눠서)
+  const chunks = [];
+  for (let i = 0; i < allIds.length; i += 50) chunks.push(allIds.slice(i, i+50));
+  const statsResults = await Promise.all(chunks.map(ids =>
+    ytFetch('/videos', { part:'snippet,statistics,contentDetails', id:ids.join(',') })
+  ));
+  const allVideos = statsResults.flatMap(d => d?.items || []);
+
+  // 조회수 필터
+  let items = allVideos.filter(v => parseInt(v.statistics?.viewCount||0) >= minViews);
+
+  // 정렬
+  if (sortMode === 'hot') {
+    // 최근 + 조회수 = 업로드 후 시간당 조회수(velocity) 내림차순
+    items.sort((a,b) => {
+      const velA = parseInt(a.statistics?.viewCount||0) / Math.max(1,(Date.now()-new Date(a.snippet?.publishedAt))/3600000);
+      const velB = parseInt(b.statistics?.viewCount||0) / Math.max(1,(Date.now()-new Date(b.snippet?.publishedAt))/3600000);
+      return velB - velA;
+    });
+  } else if (sortMode === 'viewCount') {
     items.sort((a,b) => parseInt(b.statistics?.viewCount||0) - parseInt(a.statistics?.viewCount||0));
   } else {
-    const data = await ytFetch('/videos', {
-      part:'snippet,statistics,contentDetails', chart:'mostPopular',
-      regionCode:region, videoCategoryId:catId, maxResults:50, hl:'ko',
-    });
-    items = data?.items || [];
-    if (wantLong) items = items.filter(v => !isShort(v.contentDetails?.duration, v.snippet));
+    items.sort((a,b) => new Date(b.snippet?.publishedAt) - new Date(a.snippet?.publishedAt));
   }
 
   document.getElementById('result-count').textContent = `총 ${items.length}개`;
   const st = {new:0,up:0,down:0,keep:0};
   items.forEach(() => { const s=randStatus(); st[s]++; });
   ['new','up','down','keep'].forEach(k => document.getElementById('cnt-'+k).textContent = st[k]);
-  if (!items.length) { grid.innerHTML = emptyHtml('해당 조건의 영상이 없습니다'); return; }
+  if (!items.length) { grid.innerHTML = emptyHtml('연예인 쇼핑쇼츠를 찾지 못했습니다'); return; }
   grid.innerHTML = `<div class="video-grid">${items.map((v,i)=>videoCard(v,i+1,v.contentDetails?.duration)).join('')}</div>`;
 }
 
-// 키워드 자동 확장: 입력어 → 연관 쿼리 배열 생성
+// 연예인 쇼핑쇼츠 특화 키워드 확장
 function expandKeywords(q) {
-  const queries = [q]; // 원본 키워드 항상 포함
+  const base = q.trim();
+  const queries = new Set();
 
-  // 연예인 명품/쇼핑 관련
-  if (/명품|럭셔리|luxury|브랜드|하이엔드/.test(q)) {
-    queries.push(q + ' 하울', q + ' 언박싱', q + ' 쇼핑');
+  // 원본 쿼리 (그냥 + #shorts 붙인 버전 둘 다)
+  queries.add(base);
+  queries.add(base + ' #shorts');
+
+  // 연예인/셀럽/아이돌 키워드 확장
+  if (/연예인|셀럽|스타|배우|가수/.test(base)) {
+    queries.add(base + ' 추천템 #shorts');
+    queries.add(base + ' 명품 #shorts');
+    queries.add(base + ' 쇼핑 하울 #shorts');
+    queries.add(base + ' 착용템 #shorts');
   }
-  if (/연예인|아이돌|셀럽|스타/.test(q)) {
-    queries.push(q + ' 패션', q + ' 쇼핑', q + ' 템');
+  if (/아이돌|idol/.test(base)) {
+    queries.add(base + ' 착용 #shorts');
+    queries.add(base + ' 같은템 #shorts');
+    queries.add(base + ' 패션 #shorts');
   }
-  if (/템|아이템|쇼핑|하울|언박싱/.test(q)) {
-    queries.push(q + ' 추천', q + ' 리뷰');
+  // 명품/브랜드 확장
+  if (/명품|럭셔리|luxury|샤넬|에르메스|루이비통|구찌|프라다|발렌시아가/.test(base)) {
+    queries.add('연예인 ' + base + ' #shorts');
+    queries.add('셀럽 ' + base + ' 하울 #shorts');
+    queries.add(base + ' 언박싱 #shorts');
   }
-  // 음식/먹방
-  if (/먹방|맛집|요리|레시피|쿠킹/.test(q)) {
-    queries.push(q + ' 브이로그', q + ' 후기');
+  // 쇼핑/하울 확장
+  if (/쇼핑|하울|언박싱|템|아이템/.test(base)) {
+    queries.add('연예인 ' + base + ' #shorts');
+    queries.add('아이돌 ' + base + ' #shorts');
+    queries.add(base + ' 추천 #shorts');
   }
-  // 뷰티
-  if (/뷰티|메이크업|화장|스킨케어|피부/.test(q)) {
-    queries.push(q + ' 추천', q + ' 리뷰', q + ' 튜토리얼');
+  // 뷰티/패션 확장
+  if (/뷰티|메이크업|화장|스킨|패션|옷|코디/.test(base)) {
+    queries.add('연예인 ' + base + ' #shorts');
+    queries.add('아이돌 ' + base + ' #shorts');
+    queries.add('셀럽 ' + base + ' 추천 #shorts');
   }
-  // 운동/헬스
-  if (/운동|헬스|다이어트|홈트|피트니스/.test(q)) {
-    queries.push(q + ' 루틴', q + ' 방법');
-  }
-  // 재테크
-  if (/재테크|주식|투자|부동산|코인/.test(q)) {
-    queries.push(q + ' 방법', q + ' 공부', q + ' 초보');
-  }
-  // 단어 분리 확장 (2글자 이상 단어 조합)
-  const words = q.split(/\s+/).filter(w => w.length >= 2);
-  if (words.length >= 2) {
-    // 단어 순서 바꿔서도 검색
-    queries.push(words.slice().reverse().join(' '));
-    // 각 단어 단독 검색 (첫 번째 단어만)
-    queries.push(words[0] + ' 쇼츠');
-    queries.push(words[words.length-1] + ' 인기');
+  // 아무 매칭 없으면 연예인 prefix 붙여서도 검색
+  if (queries.size <= 2) {
+    queries.add('연예인 ' + base + ' #shorts');
+    queries.add('아이돌 ' + base + ' #shorts');
+    queries.add('셀럽 ' + base + ' 추천 #shorts');
   }
 
-  // 중복 제거 후 최대 4개 쿼리
-  return [...new Set(queries)].slice(0, 4);
+  return [...queries].slice(0, 5);
 }
 
 async function doSearch() {
@@ -587,29 +725,30 @@ async function doSearch() {
   if (!q) { showToast('검색어를 입력해 주세요'); return; }
   if (!S.apiKey) { el.innerHTML = noApiHtml(); return; }
 
-  el.innerHTML = `<div class="loading"><div class="spinner"></div> 연관 키워드 확장 검색 중...</div>`;
+  el.innerHTML = `<div class="loading"><div class="spinner"></div> 셀럽템 쇼츠 발굴 중...</div>`;
 
   const dateMap = {
     today: new Date(Date.now()-86400000).toISOString(),
     week: new Date(Date.now()-7*86400000).toISOString(),
-    month: new Date(Date.now()-30*86400000).toISOString()
+    month: new Date(Date.now()-30*86400000).toISOString(),
+    '3month': new Date(Date.now()-90*86400000).toISOString()
   };
   const dur = document.getElementById('f-dur').value;
   const sort = document.getElementById('f-sort').value;
   const dateVal = dateMap[document.getElementById('f-date').value];
   const minViews = parseInt(document.getElementById('f-views').value) || 0;
+  const maxSubs = parseInt(document.getElementById('f-maxsubs').value) || 0;
 
   const queries = expandKeywords(q);
 
-  // 쇼츠 선택 시 #shorts 자동 부착, maxResults 50
-  const isShortSearch = dur === 'short';
-  const buildQ = kw => isShortSearch ? kw + ' #shorts' : kw;
+  // #shorts는 쿼리에 포함, videoDuration 제거 (결과 수 극대화)
+  // dur 선택 시 클라이언트에서 필터링
+  const buildQ = kw => kw; // expandKeywords에서 이미 #shorts 붙임
 
   const searchResults = await Promise.all(queries.map(kw =>
     ytFetch('/search', {
-      part:'snippet', q:buildQ(kw), type:'video', order:sort,
+      part:'snippet', q:kw, type:'video', order:sort,
       publishedAfter:dateVal,
-      videoDuration: dur === 'any' ? undefined : dur,
       regionCode:'KR', relevanceLanguage:'ko', maxResults:50,
     })
   ));
@@ -632,20 +771,60 @@ async function doSearch() {
   });
   if (!statsData) return;
 
-  let items = (statsData.items || []).filter(v => parseInt(v.statistics?.viewCount||0) >= minViews);
+  let items = statsData.items || [];
+
+  // duration 클라이언트 필터 (videoDuration API 파라미터 대신)
+  if (dur === 'short') {
+    items = items.filter(v => isShort(v.contentDetails?.duration, v.snippet));
+  } else if (dur === 'medium') {
+    items = items.filter(v => {
+      const m = (v.contentDetails?.duration||'').match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
+      if (!m) return true;
+      const secs = (+m[1]||0)*3600+(+m[2]||0)*60+(+m[3]||0);
+      return secs > 180 && secs <= 1200;
+    });
+  } else if (dur === 'long') {
+    items = items.filter(v => {
+      const m = (v.contentDetails?.duration||'').match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
+      if (!m) return true;
+      const secs = (+m[1]||0)*3600+(+m[2]||0)*60+(+m[3]||0);
+      return secs > 1200;
+    });
+  }
+
+  // 조회수 필터
+  items = items.filter(v => parseInt(v.statistics?.viewCount||0) >= minViews);
+
+  // 구독자 필터 (채널 API 필요)
+  let chMapSearch = {};
+  if (maxSubs > 0) {
+    const chIdsF = [...new Set(items.map(v=>v.snippet?.channelId).filter(Boolean))];
+    const chDataF = chIdsF.length ? await ytFetch('/channels',{part:'statistics',id:chIdsF.join(',')}) : null;
+    (chDataF?.items||[]).forEach(ch => { chMapSearch[ch.id] = ch.statistics; });
+    items = items.filter(v => {
+      const subs = parseInt(chMapSearch[v.snippet?.channelId]?.subscriberCount||0);
+      return subs === 0 || subs <= maxSubs;
+    });
+  }
 
   // 조회수 내림차순 정렬
   items.sort((a,b) => parseInt(b.statistics?.viewCount||0) - parseInt(a.statistics?.viewCount||0));
 
   if (!items.length) { el.innerHTML = emptyHtml(`"${q}" 조건에 맞는 영상이 없습니다`); return; }
 
+  // 채널 구독자수 조회 (미리 가져온 것 재활용)
+  const chIds = [...new Set(items.map(v => v.snippet?.channelId).filter(Boolean).filter(id => !chMapSearch[id]))];
+  const chData = chIds.length ? await ytFetch('/channels', { part:'statistics', id:chIds.join(',') }) : null;
+  const chMap = {...chMapSearch};
+  (chData?.items||[]).forEach(ch => { chMap[ch.id] = ch.statistics; });
+
   const usedQueries = queries.join(' · ');
   el.innerHTML = `
-    <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap">
-      <span style="font-size:13px;color:var(--muted)">검색 결과 <strong style="color:var(--text)">${items.length}개</strong></span>
-      <span style="font-size:11px;color:var(--muted);background:#F3F3F8;padding:3px 10px;border-radius:20px">🔍 확장 키워드: ${usedQueries}</span>
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;flex-wrap:wrap">
+      <span style="font-size:13px;color:var(--muted)">발견된 영상 <strong style="color:var(--text)">${items.length}개</strong></span>
+      <span style="font-size:11px;color:var(--muted);background:#F3F3F8;padding:3px 10px;border-radius:20px">🔍 ${usedQueries}</span>
     </div>
-    <div class="video-grid">${items.map((v,i)=>videoCard(v,i+1,v.contentDetails?.duration)).join('')}</div>`;
+    <div class="golden-grid">${items.map((v,i)=>goldenCard(v,i+1,chMap[v.snippet?.channelId])).join('')}</div>`;
 }
 
 async function loadRanking() {
@@ -702,23 +881,76 @@ function selectTopic(btn) {
 
 async function loadGolden() {
   const el = document.getElementById('golden-results');
+  const countEl = document.getElementById('golden-count');
+  const updateEl = document.getElementById('golden-update');
   if (!S.apiKey) { el.innerHTML = noApiHtml(); return; }
   el.innerHTML = loadingHtml();
+
   const dur = S.filters.vtype;
-  const q = S.gTopic === '전체' ? '인기' : S.gTopic;
-  const params = {
-    part:'snippet', type:'video', order:S.filters.gsort,
-    videoDuration:dur, regionCode:'KR', relevanceLanguage:'ko', maxResults:20, q,
-  };
-  if (S.gCatId && S.gCatId !== '0') params.videoCategoryId = S.gCatId;
-  const searchData = await ytFetch('/search', params);
-  if (!searchData) return;
-  const ids = (searchData.items||[]).map(i=>i.id.videoId).filter(Boolean).join(',');
-  if (!ids) { el.innerHTML = emptyHtml('해당 주제의 영상이 없습니다'); return; }
-  const statsData = await ytFetch('/videos', { part:'snippet,statistics,contentDetails', id:ids });
+  const sortBy = S.filters.gsort;
+  const q = S.gTopic === '전체' ? '인기 쇼츠' : S.gTopic;
+
+  // 검색 쿼리 2개 병렬
+  const params1 = { part:'snippet', type:'video', order:sortBy, videoDuration:dur, regionCode:'KR', relevanceLanguage:'ko', maxResults:50, q };
+  const params2 = { part:'snippet', type:'video', order:'viewCount', videoDuration:dur, regionCode:'KR', relevanceLanguage:'ko', maxResults:50, q };
+  if (S.gCatId && S.gCatId !== '0') { params1.videoCategoryId = S.gCatId; params2.videoCategoryId = S.gCatId; }
+
+  const [sr1, sr2] = await Promise.all([ytFetch('/search', params1), ytFetch('/search', params2)]);
+
+  const seenIds = new Set();
+  const allIds = [];
+  [sr1, sr2].forEach(data => {
+    (data?.items||[]).forEach(item => {
+      const vid = item.id?.videoId;
+      if (vid && !seenIds.has(vid)) { seenIds.add(vid); allIds.push(vid); }
+    });
+  });
+  if (!allIds.length) { el.innerHTML = emptyHtml('해당 주제의 영상이 없습니다'); return; }
+
+  // 영상 통계
+  const statsData = await ytFetch('/videos', { part:'snippet,statistics,contentDetails', id:allIds.join(',') });
   if (!statsData) return;
-  const items = statsData.items || [];
-  el.innerHTML = `<div class="video-grid">${items.map((v,i)=>videoCard(v,i+1,v.contentDetails?.duration)).join('')}</div>`;
+  let items = statsData.items || [];
+
+  // 채널 ID 수집 → 구독자수 조회
+  const channelIds = [...new Set(items.map(v => v.snippet?.channelId).filter(Boolean))];
+  const chData = channelIds.length ? await ytFetch('/channels', {
+    part:'statistics', id:channelIds.join(','), maxResults:50,
+  }) : null;
+  const chMap = {};
+  (chData?.items||[]).forEach(ch => { chMap[ch.id] = ch.statistics; });
+
+  // 구독자 구간 필터
+  const subsFilter = S.filters.gsubs;
+  if (subsFilter) {
+    const max = parseInt(subsFilter);
+    items = items.filter(v => {
+      const subs = parseInt(chMap[v.snippet?.channelId]?.subscriberCount||0);
+      return subs > 0 && subs <= max;
+    });
+  }
+
+  // 정렬: 일일 조회수(velocity) 기준
+  items.sort((a,b) => {
+    const daysA = Math.max(1,(Date.now()-new Date(a.snippet?.publishedAt))/86400000);
+    const daysB = Math.max(1,(Date.now()-new Date(b.snippet?.publishedAt))/86400000);
+    const velA = parseInt(a.statistics?.viewCount||0)/daysA;
+    const velB = parseInt(b.statistics?.viewCount||0)/daysB;
+    return velB - velA;
+  });
+
+  // 자정 갱신 시각 표시
+  const now = new Date();
+  const kstNow = new Date(now.getTime() + 9*3600000);
+  const h = kstNow.getUTCHours(), m = kstNow.getUTCMinutes();
+  const nextMidnight = new Date(kstNow);
+  nextMidnight.setUTCHours(24,0,0,0);
+  const minsLeft = Math.round((nextMidnight - kstNow)/60000);
+  if (updateEl) updateEl.innerHTML = `🕐 마지막 데이터 갱신: 오늘 오전 ${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')} (KST) &nbsp;·&nbsp; 다음 갱신까지 ${minsLeft}분`;
+  if (countEl) countEl.textContent = `발견된 영상 ${items.length}개`;
+
+  if (!items.length) { el.innerHTML = emptyHtml('해당 조건의 영상이 없습니다'); return; }
+  el.innerHTML = `<div class="golden-grid">${items.map((v,i)=>goldenCard(v,i+1,chMap[v.snippet?.channelId])).join('')}</div>`;
 }
 
 function toggleFav(id, btn) {
