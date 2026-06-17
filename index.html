@@ -427,17 +427,22 @@ function velEstimate(views, pub) {
   return '+' + fmtNum(Math.round(parseInt(views||0) / hrs)) + '/h';
 }
 
-function isShort(dur) {
+function isShort(dur, snippet) {
+  if (snippet) {
+    const t = ((snippet.title||'') + ' ' + (snippet.description||'')).toLowerCase();
+    if (t.includes('#shorts') || t.includes('#short')) return true;
+  }
   if (!dur) return false;
   const m = dur.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
   if (!m) return false;
-  return ((+m[1]||0)*3600 + (+m[2]||0)*60 + (+m[3]||0)) <= 65;
+  const secs = (+m[1]||0)*3600 + (+m[2]||0)*60 + (+m[3]||0);
+  return secs > 0 && secs <= 180;
 }
 
 function randStatus() { return ['new','up','up','keep','keep','down'][Math.floor(Math.random()*6)]; }
 
 function videoCard(v, rank, dur) {
-  const short = dur ? isShort(dur) : false;
+  const short = isShort(dur, v.snippet);
   const isFav = S.favorites.includes(v.id);
   const views = v.statistics?.viewCount || 0;
   const pub = v.snippet?.publishedAt || '';
@@ -479,14 +484,51 @@ async function loadTrending() {
   const grid = document.getElementById('trending-grid');
   if (!S.apiKey) { grid.innerHTML = noApiHtml(); return; }
   grid.innerHTML = loadingHtml();
-  const data = await ytFetch('/videos', {
-    part:'snippet,statistics,contentDetails', chart:'mostPopular',
-    regionCode: S.filters.tregion || 'KR', videoCategoryId: S.filters.cat, maxResults:24, hl:'ko',
-  });
-  if (!data) return;
-  let items = data.items || [];
-  if (S.filters.type === 'short') items = items.filter(v => isShort(v.contentDetails?.duration));
-  if (S.filters.type === 'long') items = items.filter(v => !isShort(v.contentDetails?.duration));
+  const region = S.filters.tregion || 'KR';
+  const catId = S.filters.cat;
+  const wantShorts = S.filters.type === 'short';
+  const wantLong   = S.filters.type === 'long';
+  let items = [];
+
+  if (wantShorts) {
+    // mostPopular + #shorts 검색 병렬 실행
+    const [popData, srData] = await Promise.all([
+      ytFetch('/videos', {
+        part:'snippet,statistics,contentDetails', chart:'mostPopular',
+        regionCode:region, videoCategoryId:catId, maxResults:50, hl:'ko',
+      }),
+      ytFetch('/search', {
+        part:'snippet', q:'#shorts', type:'video', videoDuration:'short',
+        order:'viewCount', regionCode:region, relevanceLanguage:'ko',
+        videoCategoryId:catId, maxResults:50,
+      }),
+    ]);
+    const seenIds = new Set();
+    // mostPopular에서 쇼츠만 추출
+    (popData?.items || []).forEach(v => {
+      if (isShort(v.contentDetails?.duration, v.snippet)) {
+        seenIds.add(v.id); items.push(v);
+      }
+    });
+    // #shorts 검색 결과 중 새 ID만
+    const newIds = (srData?.items || [])
+      .map(i => i.id?.videoId).filter(id => id && !seenIds.has(id));
+    if (newIds.length) {
+      const extra = await ytFetch('/videos', {
+        part:'snippet,statistics,contentDetails', id:newIds.join(','),
+      });
+      (extra?.items || []).forEach(v => { seenIds.add(v.id); items.push(v); });
+    }
+    items.sort((a,b) => parseInt(b.statistics?.viewCount||0) - parseInt(a.statistics?.viewCount||0));
+  } else {
+    const data = await ytFetch('/videos', {
+      part:'snippet,statistics,contentDetails', chart:'mostPopular',
+      regionCode:region, videoCategoryId:catId, maxResults:50, hl:'ko',
+    });
+    items = data?.items || [];
+    if (wantLong) items = items.filter(v => !isShort(v.contentDetails?.duration, v.snippet));
+  }
+
   document.getElementById('result-count').textContent = `총 ${items.length}개`;
   const st = {new:0,up:0,down:0,keep:0};
   items.forEach(() => { const s=randStatus(); st[s]++; });
@@ -559,12 +601,16 @@ async function doSearch() {
 
   const queries = expandKeywords(q);
 
-  // 모든 쿼리 병렬 검색
+  // 쇼츠 선택 시 #shorts 자동 부착, maxResults 50
+  const isShortSearch = dur === 'short';
+  const buildQ = kw => isShortSearch ? kw + ' #shorts' : kw;
+
   const searchResults = await Promise.all(queries.map(kw =>
     ytFetch('/search', {
-      part:'snippet', q:kw, type:'video', order:sort,
-      publishedAfter:dateVal, videoDuration:dur,
-      regionCode:'KR', relevanceLanguage:'ko', maxResults:10,
+      part:'snippet', q:buildQ(kw), type:'video', order:sort,
+      publishedAfter:dateVal,
+      videoDuration: dur === 'any' ? undefined : dur,
+      regionCode:'KR', relevanceLanguage:'ko', maxResults:50,
     })
   ));
 
