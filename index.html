@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>터진튜브 — 유튜브 급등 영상 탐색기</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --bg:#F7F7FA;
+    --surface:#FFFFFF;
+    --sidebar:#FFFFFF;
+    --border:#EAEAF0;
+    --text:#1A1A2E;
+    --muted:#8888A0;
+    --accent:#6C63FF;
+    --accent2:#FF6B9D;
+    --accent-light:#EEF0FF;
+    --green:#22C55E;
+    --red:#EF4444;
+    --amber:#F59E0B;
+    --blue:#3B82F6;
+    --tag-radius:20px;
+    --radius:12px;
+    --sidebar-w:220px;
+  }
+  body{font-family:'Pretendard','Apple SD Gothic Neo',sans-serif;background:var(--bg);color:var(--text);display:flex;height:100vh;overflow:hidden;font-size:14px}
+
+  /* SIDEBAR */
+  .sidebar{width:var(--sidebar-w);background:var(--sidebar);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;overflow-y:auto}
+  .sidebar-logo{padding:20px 16px 12px;border-bottom:1px solid var(--border)}
+  .logo-badge{background:linear-gradient(135deg,#FF6B9D,#6C63FF);color:#fff;font-size:11px;font-weight:700;padding:3px 8px;border-radius:6px;display:inline-block;margin-bottom:6px}
+  .logo-title{font-size:16px;font-weight:800;color:var(--text);line-height:1.3}
+  .logo-sub{font-size:11px;color:var(--muted);margin-top:2px}
+  .sidebar-section{padding:12px 8px 4px;font-size:11px;color:var(--muted);font-weight:600;letter-spacing:0.05em;text-transform:uppercase}
+  .nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;cursor:pointer;margin:2px 8px;transition:all .15s;color:var(--muted);font-size:13px;font-weight:500}
+  .nav-item:hover{background:#F3F3F8;color:var(--text)}
+  .nav-item.active{background:var(--accent-light);color:var(--accent);font-weight:700}
+  .nav-item.active .nav-icon{color:var(--accent)}
+  .nav-icon{font-size:18px;width:22px;text-align:center}
+  .sidebar-footer{margin-top:auto;padding:16px;border-top:1px solid var(--border);font-size:11px;color:var(--muted)}
+
+  /* MAIN */
+  .main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+  .topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:0 24px;display:flex;align-items:center;gap:12px;height:56px;flex-shrink:0}
+  .topbar-title{font-size:16px;font-weight:800;color:var(--text)}
+  .topbar-sub{font-size:12px;color:var(--muted)}
+  .refresh-btn{margin-left:auto;display:flex;align-items:center;gap:6px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:7px 14px;cursor:pointer;font-size:12px;font-weight:600;color:var(--muted);transition:all .15s}
+  .refresh-btn:hover{border-color:var(--accent);color:var(--accent)}
+
+  /* API BANNER */
+  .api-banner{background:#FFFBEB;border:1px solid #FDE68A;border-radius:10px;margin:16px 24px 0;padding:12px 16px;display:flex;align-items:center;gap:10px;font-size:13px;color:#92400E}
+  .api-banner-btn{margin-left:auto;background:#F59E0B;color:#fff;border:none;border-radius:8px;padding:7px 14px;cursor:pointer;font-size:12px;font-weight:700;white-space:nowrap}
+  .api-banner.hidden{display:none}
+
+  .content{flex:1;overflow-y:auto;padding:0 24px 24px}
+
+  /* PAGE */
+  .page{display:none}
+  .page.active{display:block}
+
+  /* FILTER BAR */
+  .filter-bar{display:flex;align-items:center;gap:6px;padding:16px 0 12px;flex-wrap:wrap}
+  .filter-group{display:flex;gap:4px}
+  .filter-divider{width:1px;height:28px;background:var(--border);margin:0 4px;align-self:center}
+  .ftab{padding:6px 14px;border-radius:20px;border:1px solid var(--border);background:var(--surface);cursor:pointer;font-size:12px;font-weight:600;color:var(--muted);transition:all .15s;white-space:nowrap}
+  .ftab:hover{border-color:var(--accent);color:var(--accent)}
+  .ftab.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+  .ftab.accent2.active{background:var(--accent2);border-color:var(--accent2)}
+
+  /* STATUS PILLS */
+  .status-pills{display:flex;gap:6px;margin-left:8px}
+  .spill{display:flex;align-items:center;gap:4px;padding:5px 12px;border-radius:20px;border:1px solid var(--border);background:var(--surface);font-size:12px;font-weight:600;cursor:pointer;transition:all .15s}
+  .spill:hover{background:#F3F3F8}
+  .spill .dot{width:8px;height:8px;border-radius:50%;display:inline-block}
+  .dot-blue{background:#3B82F6}
+  .dot-green{background:#22C55E}
+  .dot-red{background:#EF4444}
+  .dot-gray{background:#9CA3AF}
+
+  .result-count{margin-left:auto;font-size:12px;color:var(--muted);font-weight:500;white-space:nowrap}
+
+  /* VIDEO GRID */
+  .video-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px;margin-top:8px}
+  .video-card{background:var(--surface);border-radius:var(--radius);border:1px solid var(--border);overflow:hidden;cursor:pointer;transition:all .2s;position:relative}
+  .video-card:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(108,99,255,0.1);border-color:var(--accent)}
+  .video-thumb{width:100%;aspect-ratio:16/9;object-fit:cover;background:#E5E5EF;display:block;position:relative}
+  .thumb-placeholder{width:100%;aspect-ratio:16/9;background:linear-gradient(135deg,#E5E5EF,#D0D0E8);display:flex;align-items:center;justify-content:center;font-size:28px}
+  .rank-badge{position:absolute;top:8px;left:8px;background:rgba(0,0,0,0.7);color:#fff;font-size:11px;font-weight:800;padding:3px 7px;border-radius:6px}
+  .shorts-badge{position:absolute;top:8px;right:8px;background:var(--accent2);color:#fff;font-size:10px;font-weight:700;padding:2px 7px;border-radius:5px}
+  .star-btn{position:absolute;bottom:8px;right:8px;width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,0.9);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px;transition:all .15s}
+  .star-btn:hover{background:#fff;transform:scale(1.1)}
+  .video-info{padding:12px}
+  .video-title{font-size:13px;font-weight:600;line-height:1.4;margin-bottom:8px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;color:var(--text)}
+  .video-meta{display:flex;align-items:center;gap:6px;margin-bottom:8px}
+  .channel-avatar{width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;flex-shrink:0}
+  .channel-name{font-size:11px;color:var(--muted);font-weight:500}
+  .channel-views{font-size:11px;color:var(--muted)}
+  .velocity-row{display:flex;align-items:center;justify-content:space-between;padding-top:8px;border-top:1px solid var(--border)}
+  .velocity{font-size:13px;font-weight:700;color:var(--green);display:flex;align-items:center;gap:3px}
+  .velocity.down{color:var(--red)}
+  .copy-btn{background:none;border:none;cursor:pointer;color:var(--muted);font-size:16px;padding:2px;transition:all .15s}
+  .copy-btn:hover{color:var(--accent)}
+  .status-tag{font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;position:absolute;top:8px;left:40px}
+  .tag-new{background:#EFF6FF;color:#1D4ED8}
+  .tag-up{background:#F0FDF4;color:#15803D}
+  .tag-down{background:#FEF2F2;color:#B91C1C}
+  .tag-keep{background:#F9FAFB;color:#6B7280}
+
+  /* SEARCH PAGE */
+  .search-box{display:flex;align-items:center;gap:12px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:12px 16px;margin-top:16px;transition:all .2s}
+  .search-box:focus-within{border-color:var(--accent);box-shadow:0 0 0 3px rgba(108,99,255,0.1)}
+  .search-box input{flex:1;border:none;outline:none;font-size:14px;color:var(--text);background:transparent}
+  .search-box input::placeholder{color:var(--muted)}
+  .search-icon{font-size:18px;color:var(--muted)}
+  .filter-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:16px}
+  .filter-select-wrap{display:flex;flex-direction:column;gap:6px}
+  .filter-label{font-size:11px;color:var(--muted);font-weight:600;display:flex;align-items:center;gap:4px}
+  .filter-select{border:1px solid var(--border);border-radius:8px;padding:9px 12px;font-size:13px;color:var(--text);background:var(--surface);cursor:pointer;outline:none;transition:all .15s;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238888A0' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:28px}
+  .filter-select:focus{border-color:var(--accent)}
+  .search-cta{margin-top:16px;width:100%;padding:16px;background:linear-gradient(135deg,#6C63FF,#FF6B9D);color:#fff;border:none;border-radius:var(--radius);font-size:15px;font-weight:800;cursor:pointer;transition:all .2s;letter-spacing:0.01em}
+  .search-cta:hover{opacity:0.9;transform:translateY(-1px)}
+  .search-cta:active{transform:scale(0.99)}
+
+  /* RANKING TABLE */
+  .rank-controls{display:flex;align-items:center;gap:6px;padding:16px 0 12px;flex-wrap:wrap}
+  .rank-table{background:var(--surface);border-radius:var(--radius);border:1px solid var(--border);overflow:hidden;margin-top:4px}
+  .rank-table table{width:100%;border-collapse:collapse}
+  .rank-table thead tr{border-bottom:1px solid var(--border);background:#FAFAFA}
+  .rank-table thead th{padding:11px 16px;text-align:left;font-size:11px;font-weight:700;color:var(--muted);letter-spacing:0.05em;text-transform:uppercase}
+  .rank-table tbody tr{border-bottom:1px solid var(--border);transition:background .15s;cursor:pointer}
+  .rank-table tbody tr:last-child{border-bottom:none}
+  .rank-table tbody tr:hover{background:#F7F7FF}
+  .rank-table td{padding:12px 16px;font-size:13px}
+  .rank-num{font-size:16px;font-weight:800;color:var(--muted);width:40px}
+  .rank-num.top1{color:#F59E0B}
+  .rank-num.top2{color:#9CA3AF}
+  .rank-num.top3{color:#CD7C3A}
+  .rank-ch{display:flex;align-items:center;gap:10px}
+  .rank-avatar{width:36px;height:36px;border-radius:50%;flex-shrink:0;object-fit:cover}
+  .rank-avatar-ph{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;flex-shrink:0}
+  .rank-ch-name{font-weight:600;font-size:13px}
+  .rank-ch-type{font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;background:#EEF0FF;color:var(--accent);margin-top:2px;display:inline-block}
+  .rank-stat{font-size:13px;font-weight:700;color:var(--text)}
+  .rank-sub{font-size:12px;color:var(--muted)}
+  .rank-arrow{color:var(--muted);font-size:16px}
+  .rank-change-up{color:var(--green);font-size:12px;font-weight:700}
+  .rank-change-dn{color:var(--red);font-size:12px;font-weight:700}
+
+  /* GOLDEN CHANNEL PAGE */
+  .section-label{font-size:12px;color:var(--muted);font-weight:700;margin-bottom:10px;margin-top:20px}
+  .topic-tags{display:flex;flex-wrap:wrap;gap:8px}
+  .topic-tag{padding:8px 18px;border-radius:var(--tag-radius);border:1.5px solid var(--border);background:var(--surface);cursor:pointer;font-size:13px;font-weight:600;color:var(--muted);transition:all .15s}
+  .topic-tag:hover{border-color:var(--accent);color:var(--accent)}
+  .topic-tag.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+  .topic-tag.t0.active{background:#6C63FF;border-color:#6C63FF}
+  .topic-tag.t1.active{background:#10B981;border-color:#10B981}
+  .topic-tag.t2.active{background:#8B5CF6;border-color:#8B5CF6}
+  .topic-tag.t3.active{background:#EC4899;border-color:#EC4899}
+  .topic-tag.t4.active{background:#F59E0B;border-color:#F59E0B}
+  .topic-tag.t5.active{background:#3B82F6;border-color:#3B82F6}
+  .topic-tag.t6.active{background:#6366F1;border-color:#6366F1}
+  .topic-tag.t7.active{background:#14B8A6;border-color:#14B8A6}
+  .topic-tag.t8.active{background:#EF4444;border-color:#EF4444}
+  .topic-tag.t9.active{background:#F97316;border-color:#F97316}
+  .topic-tag.t10.active{background:#84CC16;border-color:#84CC16}
+  .topic-tag.t11.active{background:#06B6D4;border-color:#06B6D4}
+  .type-tabs{display:flex;gap:8px}
+  .type-tab{padding:8px 22px;border-radius:var(--tag-radius);border:1.5px solid var(--border);background:var(--surface);cursor:pointer;font-size:13px;font-weight:600;color:var(--muted);transition:all .15s}
+  .type-tab:hover{border-color:var(--accent);color:var(--accent)}
+  .type-tab.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+  .sub-filters{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:4px}
+  .sub-group{display:flex;gap:8px;flex-wrap:wrap}
+  .sub-tab{padding:8px 16px;border-radius:var(--tag-radius);border:1.5px solid var(--border);background:var(--surface);cursor:pointer;font-size:13px;font-weight:600;color:var(--muted);transition:all .15s}
+  .sub-tab:hover{border-color:var(--accent);color:var(--accent)}
+  .sub-tab.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+  .empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 20px;gap:12px}
+  .empty-icon{font-size:48px}
+  .empty-title{font-size:16px;font-weight:700;color:var(--text)}
+  .empty-sub{font-size:13px;color:var(--muted);text-align:center}
+
+  /* API KEY PAGE */
+  .api-card{background:var(--surface);border-radius:var(--radius);border:1px solid var(--border);padding:24px;margin-top:16px;max-width:560px}
+  .api-card h3{font-size:15px;font-weight:700;margin-bottom:6px}
+  .api-card p{font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:16px}
+  .api-input-row{display:flex;gap:8px}
+  .api-input{flex:1;border:1px solid var(--border);border-radius:8px;padding:10px 14px;font-size:13px;color:var(--text);outline:none;transition:all .2s}
+  .api-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(108,99,255,0.1)}
+  .api-save-btn{background:var(--accent);color:#fff;border:none;border-radius:8px;padding:10px 18px;cursor:pointer;font-size:13px;font-weight:700;white-space:nowrap}
+  .api-save-btn:hover{opacity:0.9}
+  .api-tip{font-size:12px;color:var(--muted);margin-top:12px;line-height:1.6;padding:10px 14px;background:#F7F7FA;border-radius:8px}
+  .api-tip a{color:var(--accent);text-decoration:none}
+  .api-status{display:flex;align-items:center;gap:8px;margin-top:12px;font-size:13px}
+  .api-dot{width:8px;height:8px;border-radius:50%;background:var(--muted)}
+  .api-dot.ok{background:var(--green)}
+  .api-dot.err{background:var(--red)}
+
+  /* LOADING */
+  .loading{display:flex;align-items:center;justify-content:center;padding:60px;gap:12px;color:var(--muted);font-size:14px}
+  .spinner{width:24px;height:24px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+
+  /* TOAST */
+  .toast{position:fixed;bottom:24px;right:24px;background:#1A1A2E;color:#fff;padding:12px 18px;border-radius:10px;font-size:13px;font-weight:500;z-index:9999;transform:translateY(80px);opacity:0;transition:all .3s}
+  .toast.show{transform:translateY(0);opacity:1}
+
+  /* SCROLLBAR */
+  ::-webkit-scrollbar{width:5px}
+  ::-webkit-scrollbar-thumb{background:var(--border);border-radius:10px}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-badge">🔥 NEW</div>
+    <div class="logo-title">터진튜브</div>
+    <div class="logo-sub">유튜브 급등 영상 탐색기</div>
+  </div>
+  <div style="padding:8px 0 4px">
+    <div class="nav-item" data-page="golden" onclick="navigate('golden')">
+      <span class="nav-icon">📊</span> 황금 채널 발굴기
+    </div>
+    <div class="nav-item" data-page="search" onclick="navigate('search')">
+      <span class="nav-icon">🔍</span> 조회수 폭발 쇼츠
+    </div>
+    <div class="nav-item active" data-page="trending" onclick="navigate('trending')">
+      <span class="nav-icon">🔥</span> 터진 영상
+    </div>
+    <div class="nav-item" data-page="ranking" onclick="navigate('ranking')">
+      <span class="nav-icon">📈</span> 채널 랭킹
+    </div>
+    <div class="nav-item" data-page="favorites" onclick="navigate('favorites')">
+      <span class="nav-icon">⭐</span> 즐겨찾기
+    </div>
+    <div style="height:1px;background:var(--border);margin:8px 16px"></div>
+    <div class="nav-item" data-page="apikey" onclick="navigate('apikey')">
+      <span class="nav-icon">🔑</span> YouTube API 키 설정
+    </div>
+    <div class="nav-item" data-page="subs" onclick="navigate('subs')">
+      <span class="nav-icon">👥</span> 구독 관리
+    </div>
+  </div>
+  <div class="sidebar-footer">v1.0.0 · 터진튜브</div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+    <div>
+      <div class="topbar-title" id="topbar-title">🔥 터진 영상</div>
+      <div class="topbar-sub" id="topbar-sub">조회수가 빠르게 올라가고 있는 영상들</div>
+    </div>
+    <button class="refresh-btn" onclick="loadCurrentPage()">↻ 새로고침</button>
+  </div>
+
+  <div id="api-banner" class="api-banner">
+    <span>⚠️</span>
+    <span><strong>YouTube API 키가 등록되지 않았습니다.</strong> 실제 데이터를 불러오려면 API 키를 등록해 주세요. (지금은 샘플 데이터로 표시 중)</span>
+    <button class="api-banner-btn" onclick="navigate('apikey')">⚙ 키 등록하기</button>
+  </div>
+
+  <div class="content">
+
+    <!-- 터진 영상 PAGE -->
+    <div class="page active" id="page-trending">
+      <div class="filter-bar">
+        <div class="filter-group">
+          <button class="ftab active accent2" data-group="type" data-val="shorts" onclick="setFilter('type',this,'trending')">쇼츠</button>
+          <button class="ftab" data-group="type" data-val="long" onclick="setFilter('type',this,'trending')">롱폼</button>
+          <button class="ftab" data-group="type" data-val="all" onclick="setFilter('type',this,'trending')">전체</button>
+        </div>
+        <div class="filter-divider"></div>
+        <div class="filter-group">
+          <button class="ftab active" data-group="sort" data-val="velocity" onclick="setFilter('sort',this,'trending')">🔥 급등순</button>
+          <button class="ftab" data-group="sort" data-val="views" onclick="setFilter('sort',this,'trending')">👁 조회수순</button>
+          <button class="ftab" data-group="sort" data-val="new" onclick="setFilter('sort',this,'trending')">🕐 최신순</button>
+        </div>
+        <div class="filter-divider"></div>
+        <div class="status-pills">
+          <button class="spill" onclick="toggleStatus('new')"><span class="dot dot-blue"></span>신규 <span id="cnt-new">4</span></button>
+          <button class="spill" onclick="toggleStatus('up')"><span class="dot dot-green"></span>상승 <span id="cnt-up">12</span></button>
+          <button class="spill" onclick="toggleStatus('down')"><span class="dot dot-red"></span>하락 <span id="cnt-down">8</span></button>
+          <button class="spill" onclick="toggleStatus('keep')"><span class="dot dot-gray"></span>유지 <span id="cnt-keep">31</span></button>
+        </div>
+        <div class="result-count" id="result-count">총 55개</div>
+      </div>
+
+      <!-- Category tabs -->
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px">
+        <button class="ftab active" data-group="cat" data-val="all" onclick="setFilter('cat',this,'trending')">전체</button>
+        <button class="ftab" data-group="cat" data-val="music" onclick="setFilter('cat',this,'trending')">🎵 음악</button>
+        <button class="ftab" data-group="cat" data-val="celeb" onclick="setFilter('cat',this,'trending')">🌟 연예인·이슈</button>
+        <button class="ftab" data-group="cat" data-val="shopping" onclick="setFilter('cat',this,'trending')">🛍 쇼핑·리뷰</button>
+        <button class="ftab" data-group="cat" data-val="drama" onclick="setFilter('cat',this,'trending')">🎬 드라마·영화</button>
+        <button class="ftab" data-group="cat" data-val="life" onclick="setFilter('cat',this,'trending')">🏠 라이프</button>
+        <button class="ftab" data-group="cat" data-val="food" onclick="setFilter('cat',this,'trending')">🍜 먹방·요리</button>
+      </div>
+
+      <div class="video-grid" id="trending-grid"></div>
+    </div>
+
+    <!-- 조회수 폭발 쇼츠 PAGE -->
+    <div class="page" id="page-search">
+      <div class="search-box">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="search-input" placeholder="검색어를 입력하세요 (예: 요리, 운동, 재테크...)" onkeydown="if(event.key==='Enter')doSearch()">
+      </div>
+      <div class="filter-row">
+        <div class="filter-select-wrap">
+          <div class="filter-label">📅 업로드 일자</div>
+          <select class="filter-select" id="f-date">
+            <option>최근 1주일</option>
+            <option>최근 2주일</option>
+            <option>최근 1개월</option>
+            <option>최근 3개월</option>
+          </select>
+        </div>
+        <div class="filter-select-wrap">
+          <div class="filter-label">👥 최대 구독자</div>
+          <select class="filter-select" id="f-subs">
+            <option>제한 없음</option>
+            <option>1만 명 이하</option>
+            <option>1만 ~ 5만 명</option>
+            <option>5만 ~ 10만 명</option>
+            <option>10만 ~ 50만 명</option>
+          </select>
+        </div>
+        <div class="filter-select-wrap">
+          <div class="filter-label">👀 조회수 범위</div>
+          <select class="filter-select" id="f-views">
+            <option>1만 ~ 5만회</option>
+            <option>5만 ~ 10만회</option>
+            <option>10만 ~ 50만회</option>
+            <option>50만회 이상</option>
+          </select>
+        </div>
+        <div class="filter-select-wrap">
+          <div class="filter-label">↕ 정렬</div>
+          <select class="filter-select" id="f-sort">
+            <option>조회수 높은순</option>
+            <option>급등 속도순</option>
+            <option>최신순</option>
+            <option>구독자 적은순</option>
+          </select>
+        </div>
+      </div>
+      <button class="search-cta" onclick="doSearch()">🚀 떡상 쇼츠 발굴 시작</button>
+      <div id="search-results" style="margin-top:20px"></div>
+    </div>
+
+    <!-- 터진 영상 PAGE (이미 위) -->
+
+    <!-- 채널 랭킹 PAGE -->
+    <div class="page" id="page-ranking">
+      <div class="rank-controls">
+        <div class="filter-group">
+          <button class="ftab active" data-group="period" data-val="24h" onclick="setFilter('period',this,'ranking')">24시간</button>
+          <button class="ftab" data-group="period" data-val="7d" onclick="setFilter('period',this,'ranking')">7일</button>
+          <button class="ftab" data-group="period" data-val="30d" onclick="setFilter('period',this,'ranking')">30일</button>
+          <button class="ftab" data-group="period" data-val="accel" onclick="setFilter('period',this,'ranking')">가속도</button>
+        </div>
+        <div class="filter-divider"></div>
+        <div class="filter-group">
+          <button class="ftab active" data-group="rtype" data-val="all" onclick="setFilter('rtype',this,'ranking')">전체</button>
+          <button class="ftab" data-group="rtype" data-val="shorts" onclick="setFilter('rtype',this,'ranking')">쇼츠</button>
+          <button class="ftab" data-group="rtype" data-val="long" onclick="setFilter('rtype',this,'ranking')">롱폼</button>
+          <button class="ftab" data-group="rtype" data-val="mix" onclick="setFilter('rtype',this,'ranking')">혼합</button>
+        </div>
+        <div style="margin-left:auto;display:flex;align-items:center;gap:8px">
+          <button class="ftab" onclick="showToast('100만 미만 채널만 필터링')">100만 미만</button>
+          <span style="font-size:12px;color:var(--muted)">채널 <strong id="rank-ch-count">50</strong>개</span>
+        </div>
+      </div>
+      <div class="rank-table">
+        <table>
+          <thead>
+            <tr>
+              <th>순위</th>
+              <th>채널</th>
+              <th style="text-align:right">24시간 조회수</th>
+              <th style="text-align:right">구독자</th>
+              <th style="text-align:right">상세</th>
+            </tr>
+          </thead>
+          <tbody id="ranking-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 황금 채널 발굴기 PAGE -->
+    <div class="page" id="page-golden">
+      <div class="section-label">관심 주제</div>
+      <div class="topic-tags" id="topic-tags"></div>
+      <div class="section-label" style="margin-top:20px">영상 타입</div>
+      <div class="type-tabs">
+        <button class="type-tab active" data-g="vtype" onclick="setVFilter('vtype',this)">쇼츠</button>
+        <button class="type-tab" data-g="vtype" onclick="setVFilter('vtype',this)">롱폼</button>
+      </div>
+      <div class="sub-filters" style="margin-top:20px">
+        <div>
+          <div class="section-label">구독자 구간</div>
+          <div class="sub-group" id="subs-group">
+            <button class="sub-tab active" onclick="setSubFilter('subs',this)">전체</button>
+            <button class="sub-tab" onclick="setSubFilter('subs',this)">0~1만 명 (급성장)</button>
+            <button class="sub-tab" onclick="setSubFilter('subs',this)">1만~5만 명</button>
+            <button class="sub-tab" onclick="setSubFilter('subs',this)">5만~10만 명</button>
+          </div>
+        </div>
+        <div>
+          <div class="section-label">정렬 기준</div>
+          <div class="sub-group" id="sort-group">
+            <button class="sub-tab active" onclick="setSubFilter('sort',this)">조회수 높은 순</button>
+            <button class="sub-tab" onclick="setSubFilter('sort',this)">구독자 많은 순</button>
+          </div>
+        </div>
+      </div>
+      <div id="golden-results" style="margin-top:24px">
+        <div class="empty-state">
+          <div class="empty-icon">👆</div>
+          <div class="empty-title">관심 주제를 선택해 주세요</div>
+          <div class="empty-sub">카테고리를 누르면 유튜브에서 분석한 채널을 즉시 보여드려요</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 즐겨찾기 PAGE -->
+    <div class="page" id="page-favorites">
+      <div style="margin-top:16px" id="fav-grid"></div>
+    </div>
+
+    <!-- API KEY PAGE -->
+    <div class="page" id="page-apikey">
+      <div class="api-card">
+        <h3>🔑 YouTube Data API v3 키 설정</h3>
+        <p>실제 유튜브 데이터를 불러오려면 Google Cloud Console에서 발급받은 API 키를 입력해 주세요. API 키는 브라우저에 안전하게 저장됩니다.</p>
+        <div class="api-input-row">
+          <input class="api-input" type="password" id="api-key-input" placeholder="AIzaSy..." value="">
+          <button class="api-save-btn" onclick="saveApiKey()">저장</button>
+        </div>
+        <div class="api-status" id="api-status">
+          <div class="api-dot" id="api-dot"></div>
+          <span id="api-status-text">API 키가 등록되지 않았습니다.</span>
+        </div>
+        <div class="api-tip">
+          💡 <strong>API 키 발급 방법:</strong><br>
+          1. <a href="https://console.cloud.google.com" target="_blank">Google Cloud Console</a> 접속<br>
+          2. 새 프로젝트 생성 → YouTube Data API v3 활성화<br>
+          3. 사용자 인증 정보 → API 키 생성<br>
+          4. 위 입력란에 붙여넣기 후 저장
+        </div>
+      </div>
+    </div>
+
+    <!-- 구독 관리 PAGE -->
+    <div class="page" id="page-subs">
+      <div class="empty-state" style="margin-top:40px">
+        <div class="empty-icon">👥</div>
+        <div class="empty-title">구독 중인 채널이 없습니다</div>
+        <div class="empty-sub">터진 영상이나 채널 랭킹에서 채널을 구독해 알림을 받으세요</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── STATE ──────────────────────────────────────────────────────
+const state = {
+  page: 'trending',
+  filters: { type:'shorts', sort:'velocity', cat:'all', period:'24h', rtype:'all' },
+  apiKey: localStorage.getItem('yt_api_key') || '',
+  favorites: JSON.parse(localStorage.getItem('yt_favorites') || '[]'),
+  topicFilter: null
+};
+
+// ── SAMPLE DATA ───────────────────────────────────────────────
+const SAMPLE_VIDEOS = [
+  {id:'v1',title:'나도 모르게 \'찐 속마음\' 튀어나온 원희',channel:'아이돌보감',views:'176.3만',age:'3일 전',velocity:'+3.1만/h',status:'up',type:'shorts',cat:'celeb',thumb:'🎤',rank:7},
+  {id:'v2',title:'과거의 나를 때려고 싶을 만큼 후회되는 그때의 나#예능',channel:'예능피크닉',views:'183.4만',age:'3일 전',velocity:'+2.2만/h',status:'up',type:'shorts',cat:'celeb',thumb:'📺',rank:14},
+  {id:'v3',title:'택시에 탄 아중마랑 백옥먹으러 가면 생기는 일',channel:'씬중즈',views:'149만',age:'3일 전',velocity:'+2.1만/h',status:'new',type:'shorts',cat:'life',thumb:'🚕',rank:15},
+  {id:'v4',title:'Turn Basic Materials Into A Handy Device 🔧',channel:'Brave Gals',views:'835만',age:'1주 전',velocity:'+2.1만/h',status:'up',type:'long',cat:'life',thumb:'🔧',rank:17},
+  {id:'v5',title:'아끼면서 장사하면 손님들은 다 느낌',channel:'클립덕',views:'284.1만',age:'1주 전',velocity:'+1.9만/h',status:'keep',type:'shorts',cat:'celeb',thumb:'🏪',rank:18},
+  {id:'v6',title:'억대금 유쾌한 경찰 모먼트',channel:'강막',views:'102.8만',age:'2일 전',velocity:'+1.8만/h',status:'new',type:'shorts',cat:'celeb',thumb:'👮',rank:23},
+  {id:'v7',title:'각자 밥 따로먹는 한가인 언정 훈 가족',channel:'언맨쇼츠',views:'77.6만',age:'2일 전',velocity:'+1.8만/h',status:'up',type:'shorts',cat:'celeb',thumb:'👨‍👩‍👧',rank:24},
+  {id:'v8',title:'친구 여친 만났을때 특',channel:'먹기전에',views:'152만',age:'2일 전',velocity:'+1.6만/h',status:'keep',type:'shorts',cat:'life',thumb:'😅',rank:27},
+  {id:'v9',title:'강력의 부상 팀이 하나가 된 순간',channel:'린박스',views:'113.3만',age:'2일 전',velocity:'+1.3만/h',status:'down',type:'shorts',cat:'drama',thumb:'💪',rank:35},
+  {id:'v10',title:'현명하게 자식교육하는 이유원',channel:'소킴',views:'168.7만',age:'5일 전',velocity:'+1.2만/h',status:'keep',type:'shorts',cat:'life',thumb:'👨‍👧',rank:38},
+  {id:'v11',title:'쩐다 진기주가 일진에게 살아남는 방법 [참교육 넷플릭스]',channel:'큭큭',views:'272.4만',age:'6일 전',velocity:'+1.1만/h',status:'keep',type:'long',cat:'drama',thumb:'🎬',rank:39},
+  {id:'v12',title:'면접자들 중에 나폴레옹을 뽑아',channel:'빠라뿡',views:'490.7만',age:'6일 전',velocity:'+1.1만/h',status:'down',type:'long',cat:'life',thumb:'😂',rank:40},
+  {id:'v13',title:'아이유 신곡 MV 비하인드 최초공개',channel:'아이유 공식',views:'520만',age:'1일 전',velocity:'+4.2만/h',status:'new',type:'long',cat:'music',thumb:'🎵',rank:3},
+  {id:'v14',title:'뉴진스 컴백 무대 쇼케이스 직캠',channel:'뉴진스 Official',views:'380만',age:'2일 전',velocity:'+3.8만/h',status:'new',type:'shorts',cat:'music',thumb:'💜',rank:5},
+  {id:'v15',title:'요즘 유행하는 하울 영상 10만원으로 도전',channel:'쇼핑킹',views:'210만',age:'3일 전',velocity:'+2.4만/h',status:'up',type:'long',cat:'shopping',thumb:'🛍',rank:9},
+  {id:'v16',title:'편의점 신상 먹방 GRWM',channel:'먹스타그램',views:'89만',age:'1일 전',velocity:'+1.5만/h',status:'new',type:'shorts',cat:'food',thumb:'🍙',rank:21},
+];
+
+const CHANNELS = [
+  {rank:1,name:'Snoop Dogg - Topic',type:'MIXED',views24:'0',subs:'11.6만',up:true},
+  {rank:2,name:'key Frame',type:'MIXED',views24:'0',subs:'8.3만',up:false},
+  {rank:3,name:'Yorushika - Topic',type:'MIXED',views24:'0',subs:'3.9만',up:true},
+  {rank:4,name:'좋아헤죠',type:'MIXED',views24:'0',subs:'30.5만',up:true},
+  {rank:5,name:'kim gun - Topic',type:'MIXED',views24:'0',subs:'24',up:false},
+  {rank:6,name:'일개주권자',type:'MIXED',views24:'0',subs:'3.5만',up:true},
+  {rank:7,name:'Royal 44 - Topic',type:'MIXED',views24:'0',subs:'3.5천',up:false},
+  {rank:8,name:'YongYong - Topic',type:'MIXED',views24:'0',subs:'8.3천',up:true},
+  {rank:9,name:'팜픽',type:'MIXED',views24:'0',subs:'4.2만',up:true},
+  {rank:10,name:'Release - Topic',type:'MIXED',views24:'0',subs:'42',up:false},
+  {rank:11,name:'아이유 Official',type:'SHORTS',views24:'52만',subs:'380만',up:true},
+  {rank:12,name:'뉴진스 Official',type:'LONG',views24:'38만',subs:'290만',up:true},
+  {rank:13,name:'스우파2',type:'MIXED',views24:'21만',subs:'85만',up:false},
+];
+
+const TOPICS = ['전체','건강/의학','영화/드라마 리뷰','연예인/이슈','재테크/부동산','동기부여/명언','AI/IT 꿀팁','라이프스타일/Vlog','반려동물','블랙박스/사건사고','뷰티','요리','여행'];
+
+// ── NAVIGATE ──────────────────────────────────────────────────
+const PAGE_META = {
+  trending: {title:'🔥 터진 영상', sub:'조회수가 빠르게 올라가고 있는 영상들'},
+  search: {title:'🔍 조회수 폭발 쇼츠 찾기', sub:'키워드로 급성장 쇼츠를 발굴하세요'},
+  ranking: {title:'📈 채널 랭킹', sub:'24시간 기준 급상승 채널 순위'},
+  golden: {title:'📊 황금 채널 발굴기', sub:'관심 주제별로 숨은 황금 채널을 찾아보세요'},
+  favorites: {title:'⭐ 즐겨찾기', sub:'저장한 영상 모아보기'},
+  apikey: {title:'🔑 API 키 설정', sub:'YouTube Data API 키를 등록하세요'},
+  subs: {title:'👥 구독 관리', sub:'구독 중인 채널 관리'},
+};
+
+function navigate(page) {
+  state.page = page;
+  document.querySelectorAll('.nav-item').forEach(el => {
+    el.classList.toggle('active', el.dataset.page === page);
+  });
+  document.querySelectorAll('.page').forEach(el => el.classList.remove('active'));
+  document.getElementById('page-'+page).classList.add('active');
+  const m = PAGE_META[page] || {};
+  document.getElementById('topbar-title').textContent = m.title || '';
+  document.getElementById('topbar-sub').textContent = m.sub || '';
+  loadCurrentPage();
+}
+
+function loadCurrentPage() {
+  if (state.page === 'trending') renderTrending();
+  if (state.page === 'ranking') renderRanking();
+  if (state.page === 'golden') renderTopics();
+  if (state.page === 'favorites') renderFavorites();
+  if (state.page === 'apikey') renderApiKey();
+}
+
+// ── FILTERS ──────────────────────────────────────────────────
+function setFilter(group, btn, page) {
+  document.querySelectorAll(`[data-group="${group}"]`).forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  state.filters[group] = btn.dataset.val;
+  if (page === 'trending') renderTrending();
+  if (page === 'ranking') renderRanking();
+}
+
+function toggleStatus(s) { showToast(`${s} 필터 적용`); }
+
+// ── RENDER TRENDING ───────────────────────────────────────────
+function renderTrending() {
+  let vids = SAMPLE_VIDEOS;
+  if (state.filters.type !== 'all') vids = vids.filter(v => v.type === state.filters.type);
+  if (state.filters.cat !== 'all') vids = vids.filter(v => v.cat === state.filters.cat);
+  if (state.filters.sort === 'velocity') vids = [...vids].sort((a,b)=>parseFloat(b.velocity)-parseFloat(a.velocity));
+  if (state.filters.sort === 'views') vids = [...vids].sort((a,b)=>parseFloat(b.views)-parseFloat(a.views));
+  if (state.filters.sort === 'new') vids = [...vids].sort((a,b)=>a.rank-b.rank);
+
+  document.getElementById('result-count').textContent = `총 ${vids.length}개`;
+
+  const statusMap = {new:'tag-new 신규',up:'tag-up 상승',down:'tag-down 하락',keep:'tag-keep 유지'};
+  document.getElementById('trending-grid').innerHTML = vids.map(v => {
+    const [tagClass, tagLabel] = statusMap[v.status].split(' ');
+    const isFav = state.favorites.includes(v.id);
+    return `<div class="video-card" onclick="openVideo('${v.id}')">
+      <div style="position:relative">
+        <div class="thumb-placeholder">${v.thumb}</div>
+        <div class="rank-badge">#${v.rank}</div>
+        ${v.type==='shorts'?'<div class="shorts-badge">Shorts</div>':''}
+        <span class="status-tag ${tagClass}">${tagLabel}</span>
+        <button class="star-btn" onclick="event.stopPropagation();toggleFav('${v.id}',this)">${isFav?'⭐':'☆'}</button>
+      </div>
+      <div class="video-info">
+        <div class="video-title">${v.title}</div>
+        <div class="video-meta">
+          <div class="channel-avatar">${v.channel[0]}</div>
+          <div>
+            <div class="channel-name">${v.channel}</div>
+            <div class="channel-views">${v.views} views · ${v.age}</div>
+          </div>
+        </div>
+        <div class="velocity-row">
+          <div class="velocity ${v.status==='down'?'down':''}">↗ ${v.velocity}</div>
+          <button class="copy-btn" onclick="event.stopPropagation();copyTitle('${v.title}')">📋</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── RENDER RANKING ────────────────────────────────────────────
+function renderRanking() {
+  const body = document.getElementById('ranking-body');
+  const medal = ['🥇','🥈','🥉'];
+  body.innerHTML = CHANNELS.map((c,i) => `
+    <tr onclick="showToast('채널 상세: ${c.name}')">
+      <td class="rank-num ${i===0?'top1':i===1?'top2':i===2?'top3':''}">${medal[i]||c.rank}</td>
+      <td><div class="rank-ch">
+        <div class="rank-avatar-ph">${c.name[0]}</div>
+        <div>
+          <div class="rank-ch-name">${c.name}</div>
+          <span class="rank-ch-type">${c.type}</span>
+        </div>
+      </div></td>
+      <td style="text-align:right"><span class="rank-stat">${c.views24}</span></td>
+      <td style="text-align:right"><span class="rank-stat">${c.subs}</span><br><span class="${c.up?'rank-change-up':'rank-change-dn'}">${c.up?'▲ 상승':'▼ 하락'}</span></td>
+      <td style="text-align:right"><span class="rank-arrow">›</span></td>
+    </tr>`).join('');
+}
+
+// ── RENDER GOLDEN (Topics) ────────────────────────────────────
+function renderTopics() {
+  const wrap = document.getElementById('topic-tags');
+  wrap.innerHTML = TOPICS.map((t,i) => `
+    <button class="topic-tag t${i} ${state.topicFilter===t?'active':''}" onclick="selectTopic('${t}',this)">${t}</button>
+  `).join('');
+}
+
+function setVFilter(g, btn) {
+  document.querySelectorAll(`[data-g="${g}"]`).forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+}
+function setSubFilter(g, btn) {
+  btn.closest('.sub-group').querySelectorAll('.sub-tab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  if (state.topicFilter) showGoldenResults();
+}
+
+function selectTopic(t, btn) {
+  state.topicFilter = t;
+  document.querySelectorAll('.topic-tag').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  showGoldenResults();
+}
+
+function showGoldenResults() {
+  const filtered = SAMPLE_VIDEOS.filter(v => {
+    if (!state.topicFilter || state.topicFilter === '전체') return true;
+    const map = {'음악':['music'],'연예인/이슈':['celeb'],'영화/드라마 리뷰':['drama'],'요리':['food'],'라이프스타일/Vlog':['life']};
+    return (map[state.topicFilter]||[]).includes(v.cat);
+  });
+  const el = document.getElementById('golden-results');
+  if (!filtered.length) {
+    el.innerHTML = `<div class="empty-state"><div class="empty-icon">😅</div><div class="empty-title">해당 카테고리 영상이 없습니다</div><div class="empty-sub">다른 주제를 선택해 보세요</div></div>`;
+    return;
+  }
+  el.innerHTML = `<div class="video-grid">${filtered.map(v=>`
+    <div class="video-card" onclick="openVideo('${v.id}')">
+      <div style="position:relative">
+        <div class="thumb-placeholder">${v.thumb}</div>
+        <div class="rank-badge">#${v.rank}</div>
+        ${v.type==='shorts'?'<div class="shorts-badge">Shorts</div>':''}
+        <button class="star-btn" onclick="event.stopPropagation();toggleFav('${v.id}',this)">${state.favorites.includes(v.id)?'⭐':'☆'}</button>
+      </div>
+      <div class="video-info">
+        <div class="video-title">${v.title}</div>
+        <div class="video-meta">
+          <div class="channel-avatar">${v.channel[0]}</div>
+          <div><div class="channel-name">${v.channel}</div><div class="channel-views">${v.views} · ${v.age}</div></div>
+        </div>
+        <div class="velocity-row">
+          <div class="velocity">↗ ${v.velocity}</div>
+          <button class="copy-btn" onclick="event.stopPropagation();copyTitle('${v.title}')">📋</button>
+        </div>
+      </div>
+    </div>`).join('')}</div>`;
+}
+
+// ── SEARCH ────────────────────────────────────────────────────
+function doSearch() {
+  const q = document.getElementById('search-input').value.trim();
+  const el = document.getElementById('search-results');
+  if (!q) { showToast('검색어를 입력해 주세요'); return; }
+  el.innerHTML = `<div class="loading"><div class="spinner"></div>발굴 중...</div>`;
+  setTimeout(() => {
+    const results = SAMPLE_VIDEOS.filter(v => v.type==='shorts').slice(0,8);
+    el.innerHTML = `<div style="font-size:13px;color:var(--muted);margin-bottom:10px">"${q}" 관련 급등 쇼츠 ${results.length}개 발굴</div>
+      <div class="video-grid">${results.map(v=>`
+      <div class="video-card" onclick="openVideo('${v.id}')">
+        <div style="position:relative">
+          <div class="thumb-placeholder">${v.thumb}</div>
+          <div class="rank-badge">#${v.rank}</div>
+          <div class="shorts-badge">Shorts</div>
+          <button class="star-btn" onclick="event.stopPropagation();toggleFav('${v.id}',this)">${state.favorites.includes(v.id)?'⭐':'☆'}</button>
+        </div>
+        <div class="video-info">
+          <div class="video-title">${v.title}</div>
+          <div class="video-meta">
+            <div class="channel-avatar">${v.channel[0]}</div>
+            <div><div class="channel-name">${v.channel}</div><div class="channel-views">${v.views} · ${v.age}</div></div>
+          </div>
+          <div class="velocity-row">
+            <div class="velocity">↗ ${v.velocity}</div>
+            <button class="copy-btn" onclick="event.stopPropagation();copyTitle('${v.title}')">📋</button>
+          </div>
+        </div>
+      </div>`).join('')}</div>`;
+  }, 1200);
+}
+
+// ── FAVORITES ─────────────────────────────────────────────────
+function toggleFav(id, btn) {
+  if (state.favorites.includes(id)) {
+    state.favorites = state.favorites.filter(f=>f!==id);
+    btn.textContent = '☆';
+    showToast('즐겨찾기에서 제거했습니다');
+  } else {
+    state.favorites.push(id);
+    btn.textContent = '⭐';
+    showToast('즐겨찾기에 추가했습니다 ⭐');
+  }
+  localStorage.setItem('yt_favorites', JSON.stringify(state.favorites));
+}
+
+function renderFavorites() {
+  const favVids = SAMPLE_VIDEOS.filter(v=>state.favorites.includes(v.id));
+  const el = document.getElementById('fav-grid');
+  if (!favVids.length) {
+    el.innerHTML = `<div class="empty-state"><div class="empty-icon">⭐</div><div class="empty-title">즐겨찾기한 영상이 없습니다</div><div class="empty-sub">영상 카드의 ☆ 버튼을 눌러 저장하세요</div></div>`;
+    return;
+  }
+  el.innerHTML = `<div class="video-grid">${favVids.map(v=>`
+    <div class="video-card">
+      <div style="position:relative">
+        <div class="thumb-placeholder">${v.thumb}</div>
+        <div class="rank-badge">#${v.rank}</div>
+        ${v.type==='shorts'?'<div class="shorts-badge">Shorts</div>':''}
+        <button class="star-btn" onclick="toggleFav('${v.id}',this)">⭐</button>
+      </div>
+      <div class="video-info">
+        <div class="video-title">${v.title}</div>
+        <div class="video-meta">
+          <div class="channel-avatar">${v.channel[0]}</div>
+          <div><div class="channel-name">${v.channel}</div><div class="channel-views">${v.views} · ${v.age}</div></div>
+        </div>
+        <div class="velocity-row">
+          <div class="velocity">↗ ${v.velocity}</div>
+        </div>
+      </div>
+    </div>`).join('')}</div>`;
+}
+
+// ── API KEY ───────────────────────────────────────────────────
+function renderApiKey() {
+  const key = state.apiKey;
+  document.getElementById('api-key-input').value = key ? '••••••••••••••••••••••' : '';
+  const dot = document.getElementById('api-dot');
+  const txt = document.getElementById('api-status-text');
+  if (key) {
+    dot.className = 'api-dot ok';
+    txt.textContent = 'API 키가 등록되어 있습니다. (실제 데이터 연동 가능)';
+    document.getElementById('api-banner').classList.add('hidden');
+  } else {
+    dot.className = 'api-dot err';
+    txt.textContent = 'API 키가 등록되지 않았습니다. (샘플 데이터 표시 중)';
+  }
+}
+
+function saveApiKey() {
+  const val = document.getElementById('api-key-input').value.trim();
+  if (!val || val.startsWith('•')) { showToast('API 키를 입력해 주세요'); return; }
+  state.apiKey = val;
+  localStorage.setItem('yt_api_key', val);
+  renderApiKey();
+  showToast('API 키가 저장되었습니다 ✅');
+}
+
+// ── UTILS ─────────────────────────────────────────────────────
+function openVideo(id) {
+  const v = SAMPLE_VIDEOS.find(x=>x.id===id);
+  if (v) showToast(`"${v.title.slice(0,20)}..." 영상으로 이동`);
+}
+function copyTitle(title) {
+  navigator.clipboard?.writeText(title);
+  showToast('제목이 복사되었습니다 📋');
+}
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2200);
+}
+
+// ── INIT ──────────────────────────────────────────────────────
+renderTrending();
+if (state.apiKey) document.getElementById('api-banner').classList.add('hidden');
+</script>
+</body>
+</html>
