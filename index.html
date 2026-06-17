@@ -176,6 +176,14 @@ body{font-family:'Pretendard','Apple SD Gothic Neo',sans-serif;background:var(--
           <button class="ftab" data-group="tsort" data-val="date" onclick="setFilter('tsort',this)">🕐 최신순</button>
         </div>
         <div class="filter-divider"></div>
+        <div class="filter-group">
+          <button class="ftab active" data-group="tregion" data-val="KR" onclick="setFilter('tregion',this);loadTrending()">🇰🇷 한국</button>
+          <button class="ftab" data-group="tregion" data-val="JP" onclick="setFilter('tregion',this);loadTrending()">🇯🇵 일본</button>
+          <button class="ftab" data-group="tregion" data-val="US" onclick="setFilter('tregion',this);loadTrending()">🇺🇸 미국</button>
+          <button class="ftab" data-group="tregion" data-val="GB" onclick="setFilter('tregion',this);loadTrending()">🇬🇧 영국</button>
+          <button class="ftab" data-group="tregion" data-val="FR" onclick="setFilter('tregion',this);loadTrending()">🇫🇷 프랑스</button>
+        </div>
+        <div class="filter-divider"></div>
         <div class="status-pills">
           <span class="spill"><span class="dot dot-blue"></span>신규 <span id="cnt-new">-</span></span>
           <span class="spill"><span class="dot dot-green"></span>상승 <span id="cnt-up">-</span></span>
@@ -255,8 +263,10 @@ body{font-family:'Pretendard','Apple SD Gothic Neo',sans-serif;background:var(--
         <div class="filter-divider"></div>
         <div class="filter-group">
           <button class="ftab active" data-group="rregion" data-val="KR" onclick="setFilter('rregion',this);loadRanking()">🇰🇷 한국</button>
-          <button class="ftab" data-group="rregion" data-val="US" onclick="setFilter('rregion',this);loadRanking()">🇺🇸 미국</button>
           <button class="ftab" data-group="rregion" data-val="JP" onclick="setFilter('rregion',this);loadRanking()">🇯🇵 일본</button>
+          <button class="ftab" data-group="rregion" data-val="US" onclick="setFilter('rregion',this);loadRanking()">🇺🇸 미국</button>
+          <button class="ftab" data-group="rregion" data-val="GB" onclick="setFilter('rregion',this);loadRanking()">🇬🇧 영국</button>
+          <button class="ftab" data-group="rregion" data-val="FR" onclick="setFilter('rregion',this);loadRanking()">🇫🇷 프랑스</button>
         </div>
         <div class="result-count" id="rank-count">-</div>
       </div>
@@ -352,7 +362,7 @@ const S = {
   page: 'trending',
   apiKey: localStorage.getItem('yt_api_key') || '',
   favorites: JSON.parse(localStorage.getItem('yt_favorites') || '[]'),
-  filters: { type:'short', tsort:'viewCount', cat:'10', rcat:'10', rregion:'KR', vtype:'short', gsubs:'', gsort:'viewCount' },
+  filters: { type:'short', tsort:'viewCount', cat:'10', tregion:'KR', rcat:'10', rregion:'KR', vtype:'short', gsubs:'', gsort:'viewCount' },
   gTopic: null, gCatId: null,
 };
 
@@ -471,7 +481,7 @@ async function loadTrending() {
   grid.innerHTML = loadingHtml();
   const data = await ytFetch('/videos', {
     part:'snippet,statistics,contentDetails', chart:'mostPopular',
-    regionCode:'KR', videoCategoryId: S.filters.cat, maxResults:24, hl:'ko',
+    regionCode: S.filters.tregion || 'KR', videoCategoryId: S.filters.cat, maxResults:24, hl:'ko',
   });
   if (!data) return;
   let items = data.items || [];
@@ -485,12 +495,58 @@ async function loadTrending() {
   grid.innerHTML = `<div class="video-grid">${items.map((v,i)=>videoCard(v,i+1,v.contentDetails?.duration)).join('')}</div>`;
 }
 
+// 키워드 자동 확장: 입력어 → 연관 쿼리 배열 생성
+function expandKeywords(q) {
+  const queries = [q]; // 원본 키워드 항상 포함
+
+  // 연예인 명품/쇼핑 관련
+  if (/명품|럭셔리|luxury|브랜드|하이엔드/.test(q)) {
+    queries.push(q + ' 하울', q + ' 언박싱', q + ' 쇼핑');
+  }
+  if (/연예인|아이돌|셀럽|스타/.test(q)) {
+    queries.push(q + ' 패션', q + ' 쇼핑', q + ' 템');
+  }
+  if (/템|아이템|쇼핑|하울|언박싱/.test(q)) {
+    queries.push(q + ' 추천', q + ' 리뷰');
+  }
+  // 음식/먹방
+  if (/먹방|맛집|요리|레시피|쿠킹/.test(q)) {
+    queries.push(q + ' 브이로그', q + ' 후기');
+  }
+  // 뷰티
+  if (/뷰티|메이크업|화장|스킨케어|피부/.test(q)) {
+    queries.push(q + ' 추천', q + ' 리뷰', q + ' 튜토리얼');
+  }
+  // 운동/헬스
+  if (/운동|헬스|다이어트|홈트|피트니스/.test(q)) {
+    queries.push(q + ' 루틴', q + ' 방법');
+  }
+  // 재테크
+  if (/재테크|주식|투자|부동산|코인/.test(q)) {
+    queries.push(q + ' 방법', q + ' 공부', q + ' 초보');
+  }
+  // 단어 분리 확장 (2글자 이상 단어 조합)
+  const words = q.split(/\s+/).filter(w => w.length >= 2);
+  if (words.length >= 2) {
+    // 단어 순서 바꿔서도 검색
+    queries.push(words.slice().reverse().join(' '));
+    // 각 단어 단독 검색 (첫 번째 단어만)
+    queries.push(words[0] + ' 쇼츠');
+    queries.push(words[words.length-1] + ' 인기');
+  }
+
+  // 중복 제거 후 최대 4개 쿼리
+  return [...new Set(queries)].slice(0, 4);
+}
+
 async function doSearch() {
   const q = document.getElementById('search-input').value.trim();
   const el = document.getElementById('search-results');
   if (!q) { showToast('검색어를 입력해 주세요'); return; }
   if (!S.apiKey) { el.innerHTML = noApiHtml(); return; }
-  el.innerHTML = loadingHtml();
+
+  el.innerHTML = `<div class="loading"><div class="spinner"></div> 연관 키워드 확장 검색 중...</div>`;
+
   const dateMap = {
     today: new Date(Date.now()-86400000).toISOString(),
     week: new Date(Date.now()-7*86400000).toISOString(),
@@ -499,20 +555,50 @@ async function doSearch() {
   const dur = document.getElementById('f-dur').value;
   const sort = document.getElementById('f-sort').value;
   const dateVal = dateMap[document.getElementById('f-date').value];
-  const searchData = await ytFetch('/search', {
-    part:'snippet', q, type:'video', order:sort,
-    publishedAfter:dateVal, videoDuration:dur,
-    regionCode:'KR', relevanceLanguage:'ko', maxResults:20,
-  });
-  if (!searchData) return;
-  const ids = (searchData.items||[]).map(i=>i.id.videoId).filter(Boolean).join(',');
-  if (!ids) { el.innerHTML = emptyHtml(`"${q}" 관련 영상을 찾지 못했습니다`); return; }
-  const statsData = await ytFetch('/videos', { part:'snippet,statistics,contentDetails', id:ids });
-  if (!statsData) return;
   const minViews = parseInt(document.getElementById('f-views').value) || 0;
-  let items = (statsData.items||[]).filter(v => parseInt(v.statistics?.viewCount||0) >= minViews);
+
+  const queries = expandKeywords(q);
+
+  // 모든 쿼리 병렬 검색
+  const searchResults = await Promise.all(queries.map(kw =>
+    ytFetch('/search', {
+      part:'snippet', q:kw, type:'video', order:sort,
+      publishedAfter:dateVal, videoDuration:dur,
+      regionCode:'KR', relevanceLanguage:'ko', maxResults:10,
+    })
+  ));
+
+  // ID 중복 제거하며 합치기
+  const seenIds = new Set();
+  const allIds = [];
+  searchResults.forEach(data => {
+    (data?.items || []).forEach(item => {
+      const vid = item.id?.videoId;
+      if (vid && !seenIds.has(vid)) { seenIds.add(vid); allIds.push(vid); }
+    });
+  });
+
+  if (!allIds.length) { el.innerHTML = emptyHtml(`"${q}" 관련 영상을 찾지 못했습니다`); return; }
+
+  // 통계 가져오기 (50개 한번에)
+  const statsData = await ytFetch('/videos', {
+    part:'snippet,statistics,contentDetails', id:allIds.join(',')
+  });
+  if (!statsData) return;
+
+  let items = (statsData.items || []).filter(v => parseInt(v.statistics?.viewCount||0) >= minViews);
+
+  // 조회수 내림차순 정렬
+  items.sort((a,b) => parseInt(b.statistics?.viewCount||0) - parseInt(a.statistics?.viewCount||0));
+
   if (!items.length) { el.innerHTML = emptyHtml(`"${q}" 조건에 맞는 영상이 없습니다`); return; }
-  el.innerHTML = `<div style="font-size:13px;color:var(--muted);margin-bottom:12px">"${q}" 검색 결과 ${items.length}개</div>
+
+  const usedQueries = queries.join(' · ');
+  el.innerHTML = `
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap">
+      <span style="font-size:13px;color:var(--muted)">검색 결과 <strong style="color:var(--text)">${items.length}개</strong></span>
+      <span style="font-size:11px;color:var(--muted);background:#F3F3F8;padding:3px 10px;border-radius:20px">🔍 확장 키워드: ${usedQueries}</span>
+    </div>
     <div class="video-grid">${items.map((v,i)=>videoCard(v,i+1,v.contentDetails?.duration)).join('')}</div>`;
 }
 
